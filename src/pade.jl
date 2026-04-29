@@ -8,10 +8,6 @@ denominator polynomial `q` of degree `m` such that
     p(z) / q(z) = a₀ + a₁ z + a₂ z² + … + O(z^{n+m+1})
 
 Requires `length(a) ≥ n + m + 1`.
-
-This is a thin wrapper around `Polynomials.fit(RationalFunction, …)` and
-inherits its element-type promotion rules — `Float64` series produce `Float64`
-polynomials, `BigFloat` series produce `BigFloat` polynomials.
 """
 function pade(a::AbstractVector{T}, m::Integer, n::Integer) where {T<:Number}
     n ≥ 0 || throw(ArgumentError("n must be ≥ 0"))
