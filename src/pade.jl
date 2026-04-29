@@ -18,8 +18,35 @@ function pade(a::AbstractVector{T}, m::Integer, n::Integer) where {T<:Number}
     m ≥ 0 || throw(ArgumentError("m must be ≥ 0"))
     length(a) ≥ n + m + 1 ||
         throw(ArgumentError("Padé [$n/$m] needs length(a) ≥ $(n+m+1), got $(length(a))"))
-    p, q = fit(RationalFunction, Polynomial(collect(a)), n, m)
-    return p, q
+
+    if m == 0
+        return Polynomial(collect(a[1:n+1])), Polynomial(T[one(T)])
+    end
+
+    A = Matrix{T}(undef, m, m)
+    @inbounds for i in 1:m, j in 1:m
+        idx = n + i - j + 1
+        A[i, j] = idx ≥ 1 ? a[idx] : zero(T)
+    end
+    rhs = T[-a[n + i + 1] for i in 1:m]
+
+    qtail = try
+        A \ rhs
+    catch e
+        e isa LinearAlgebra.SingularException || rethrow()
+        pinv(A) * rhs
+    end
+
+    qcoeffs = vcat(one(T), qtail)
+    pcoeffs = Vector{T}(undef, n + 1)
+    @inbounds for k in 0:n
+        s = zero(T)
+        for j in 0:min(k, m)
+            s += qcoeffs[j+1] * a[k - j + 1]
+        end
+        pcoeffs[k+1] = s
+    end
+    return Polynomial(pcoeffs), Polynomial(qcoeffs)
 end
 
 """
