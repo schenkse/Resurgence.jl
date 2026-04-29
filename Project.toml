@@ -1,7 +1,7 @@
 name = "Resurgence"
 uuid = "0d9a2b1e-9c4f-4f2a-9b3a-2f5b7e8f9a01"
 authors = ["Sebastian Schenk <schenk.seb@gmail.com>"]
-version = "0.1.0-DEV"
+version = "0.1.1"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
