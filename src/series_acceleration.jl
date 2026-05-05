@@ -32,8 +32,8 @@ end
 
 function _shanks_once(a::AbstractVector{T}, n::Integer) where {T<:Number}
     Anm = sum(@view a[1:n-1])
-    An  = sum(@view a[1:n])
-    Anp = sum(@view a[1:n+1])
+    An  = Anm + a[n]
+    Anp = An  + a[n+1]
     d1 = Anp - An
     d2 = An - Anm
     den = d1 - d2
