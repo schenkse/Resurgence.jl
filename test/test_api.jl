@@ -26,8 +26,16 @@ using Resurgence
 
     @testset "Pade dispatches to pade_value" begin
         a = ones(Float64, 6)
-        v = resum(Pade(1, 0; x = 0.5), a)
+        v = resum(Pade(0, 1; x = 0.5), a)
         @test v ≈ 1 / (1 - 0.5)
+    end
+
+    @testset "Pade and BorelPade share (n, m) convention" begin
+        # Asymmetric (n, m) — assert positional ordering is observable and that
+        # both APIs interpret the first arg as the numerator degree.
+        @test pade_value(a_stieltjes, 8, 12, 0.5) != pade_value(a_stieltjes, 12, 8, 0.5)
+        @test resum(Pade(8, 12; x = 0.5), a_stieltjes) ≈ pade_value(a_stieltjes, 8, 12, 0.5)
+        @test resum(BorelPade(8, 12), a_stieltjes) ≈ borel_pade(a_stieltjes; n = 8, m = 12)
     end
 
     @testset "Shanks dispatches with depth" begin

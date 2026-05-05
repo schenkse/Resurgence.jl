@@ -1,5 +1,5 @@
 """
-    pade(a, m, n) -> (p::Polynomial, q::Polynomial)
+    pade(a, n, m) -> (p::Polynomial, q::Polynomial)
 
 Return the Padé approximant `[n/m]` of the formal power series with coefficients
 `a` (constant term first): a numerator polynomial `p` of degree `n` and a
@@ -7,9 +7,10 @@ denominator polynomial `q` of degree `m` such that
 
     p(z) / q(z) = a₀ + a₁ z + a₂ z² + … + O(z^{n+m+1})
 
-Requires `length(a) ≥ n + m + 1`.
+Requires `length(a) ≥ n + m + 1`. Argument order is numerator-first to match
+the `[n/m]` notation and the keyword convention used by the Borel–Padé family.
 """
-function pade(a::AbstractVector{T}, m::Integer, n::Integer) where {T<:Number}
+function pade(a::AbstractVector{T}, n::Integer, m::Integer) where {T<:Number}
     n ≥ 0 || throw(ArgumentError("n must be ≥ 0"))
     m ≥ 0 || throw(ArgumentError("m must be ≥ 0"))
     length(a) ≥ n + m + 1 ||
@@ -46,12 +47,12 @@ function pade(a::AbstractVector{T}, m::Integer, n::Integer) where {T<:Number}
 end
 
 """
-    pade_value(a, m, n, x)
+    pade_value(a, n, m, x)
 
 Evaluate the Padé approximant `[n/m]` of `a` at `x`, i.e. return `p(x) / q(x)`
-where `(p, q) = pade(a, m, n)`.
+where `(p, q) = pade(a, n, m)`.
 """
-function pade_value(a::AbstractVector{T}, m::Integer, n::Integer, x) where {T<:Number}
-    p, q = pade(a, m, n)
+function pade_value(a::AbstractVector{T}, n::Integer, m::Integer, x) where {T<:Number}
+    p, q = pade(a, n, m)
     return p(x) / q(x)
 end

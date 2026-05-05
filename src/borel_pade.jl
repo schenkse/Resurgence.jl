@@ -35,7 +35,7 @@ function borel_pade(a::AbstractVector{T};
         throw(ArgumentError("regularize_poles=true requires positive real x (got $x)"))
     end
     Ba = borel_transform(a[1:n+m+1])
-    Bp, Bq = pade(Ba, m, n)
+    Bp, Bq = pade(Ba, n, m)
 
     integrand = if regularize_poles
         ε_eff = ε === nothing ? 100 * eps(real(T)) : ε
@@ -75,7 +75,7 @@ function borel_leroy_pade(a::AbstractVector{T};
     length(a) ≥ n + m + 1 ||
         throw(ArgumentError("borel_leroy_pade needs length(a) ≥ n+m+1 = $(n+m+1)"))
     Ba = borel_leroy_transform(a[1:n+m+1], b)
-    Bp, Bq = pade(Ba, m, n)
+    Bp, Bq = pade(Ba, n, m)
     integrand = t -> t^b * Bp(x * t) / Bq(x * t) * exp(-t)
     val, err = quadgk(integrand, 0, Inf; quad_kwargs...)
     return return_error ? (val, err) : val
@@ -105,7 +105,7 @@ function conformal_borel_pade(a::AbstractVector{T};
         throw(ArgumentError("conformal_borel_pade needs length(a) ≥ n+m+1 = $(n+m+1)"))
     Ba = borel_transform(a[1:n+m+1])
     Bw = conformal_reseries(Ba, sing, n + m)
-    Bp, Bq = pade(Bw, m, n)
+    Bp, Bq = pade(Bw, n, m)
     integrand = function (t)
         w = conformal_map(x * t; a = sing)
         return Bp(w) / Bq(w) * exp(-t)

@@ -39,15 +39,16 @@ struct Richardson <: AbstractResummation
 end
 
 """
-    Pade(m, n; x = 1)
+    Pade(n, m; x = 1)
 
-Padé approximant tag. `resum(Pade(m, n; x), a)` calls `pade_value(a, m, n, x)`.
+Padé approximant tag. `resum(Pade(n, m; x), a)` calls `pade_value(a, n, m, x)`.
+Argument order is numerator-first to match the Borel–Padé family.
 """
 struct Pade{X} <: AbstractResummation
-    m::Int
     n::Int
+    m::Int
     x::X
-    Pade(m::Integer, n::Integer; x = 1) = new{typeof(x)}(Int(m), Int(n), x)
+    Pade(n::Integer, m::Integer; x = 1) = new{typeof(x)}(Int(n), Int(m), x)
 end
 
 """
@@ -104,7 +105,7 @@ Apply `method` to the formal power series with coefficients `a`.
 """
 resum(s::Shanks, a) = shanks(a, s.n; depth = s.depth)
 resum(r::Richardson, a) = richardson(a, r.n; depth = r.depth)
-resum(p::Pade, a) = pade_value(a, p.m, p.n, p.x)
+resum(p::Pade, a) = pade_value(a, p.n, p.m, p.x)
 resum(bp::BorelPade, a) = borel_pade(a; n = bp.n, m = bp.m, x = bp.x, bp.kwargs...)
 resum(bl::BorelLeRoyPade, a) =
     borel_leroy_pade(a; n = bl.n, m = bl.m, b = bl.b, x = bl.x, bl.kwargs...)

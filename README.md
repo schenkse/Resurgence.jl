@@ -54,7 +54,7 @@ using Resurgence
 |---|---|---|
 | Shanks transformation (with iterated depth) | `shanks(a, n; depth)` | `Shanks(n; depth)` |
 | Richardson extrapolation (with iterated depth) | `richardson(a, n; depth)` | `Richardson(n; depth)` |
-| Padé approximant `[n/m]` | `pade(a, m, n)`, `pade_value(a, m, n, x)` | `Pade(m, n; x)` |
+| Padé approximant `[n/m]` | `pade(a, n, m)`, `pade_value(a, n, m, x)` | `Pade(n, m; x)` |
 | Borel transform | `borel_transform(a)` | — |
 | Borel–Le Roy transform | `borel_leroy_transform(a, b)` | — |
 | Borel–Padé resummation | `borel_pade(a; n, m, x, ...)` | `BorelPade(n, m; x, ...)` |
