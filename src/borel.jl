@@ -29,8 +29,15 @@ function borel_leroy_transform(a::AbstractVector{T}, b::Real) where {T<:Number}
     R = real(T)
     bT = R(b)
     out = similar(a)
-    @inbounds for k in 0:length(a)-1
-        out[k+1] = a[k+1] / gamma(R(k) + one(R) + bT)
+    isempty(a) && return out
+    # Γ(k+1+b) via the recurrence Γ(z+1) = z·Γ(z): seed with Γ(1+b), then
+    # multiply by (k+b) at each step. One `gamma` call instead of length(a),
+    # which is a big win for BigFloat where each call is expensive.
+    g = gamma(one(R) + bT)
+    @inbounds out[1] = a[1] / g
+    @inbounds for k in 1:length(a)-1
+        g *= R(k) + bT
+        out[k+1] = a[k+1] / g
     end
     return out
 end
