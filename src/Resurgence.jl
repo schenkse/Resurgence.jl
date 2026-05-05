@@ -17,7 +17,7 @@ include("truncation.jl")
 include("api.jl")
 
 # functional API
-export shanks
+export shanks, richardson
 export pade, pade_value
 export borel_transform, borel_leroy_transform, borel_ratios
 export conformal_map, inverse_conformal_map, conformal_reseries
@@ -25,7 +25,7 @@ export borel_pade, borel_leroy_pade, conformal_borel_pade
 export optimal_truncation, superasymptotic_remainder
 
 # unified API
-export AbstractResummation, Shanks, Pade, BorelPade, BorelLeRoyPade, ConformalBorelPade
+export AbstractResummation, Shanks, Richardson, Pade, BorelPade, BorelLeRoyPade, ConformalBorelPade
 export resum
 
 end # module

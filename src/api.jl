@@ -27,6 +27,18 @@ struct Shanks <: AbstractResummation
 end
 
 """
+    Richardson(n; depth = 1)
+
+Richardson extrapolation tag. `resum(Richardson(n), a)` calls
+`richardson(a, n; depth)`.
+"""
+struct Richardson <: AbstractResummation
+    n::Int
+    depth::Int
+    Richardson(n::Integer; depth::Integer = 1) = new(Int(n), Int(depth))
+end
+
+"""
     Pade(m, n; x = 1)
 
 Padé approximant tag. `resum(Pade(m, n; x), a)` calls `pade_value(a, m, n, x)`.
@@ -91,6 +103,7 @@ end
 Apply `method` to the formal power series with coefficients `a`.
 """
 resum(s::Shanks, a) = shanks(a, s.n; depth = s.depth)
+resum(r::Richardson, a) = richardson(a, r.n; depth = r.depth)
 resum(p::Pade, a) = pade_value(a, p.m, p.n, p.x)
 resum(bp::BorelPade, a) = borel_pade(a; n = bp.n, m = bp.m, x = bp.x, bp.kwargs...)
 resum(bl::BorelLeRoyPade, a) =

@@ -36,6 +36,11 @@ using Resurgence
         @test resum(Shanks(5; depth = 3), a) ≈ shanks(a, 5; depth = 3)
     end
 
+    @testset "Richardson dispatches with depth" begin
+        a = Float64[1 / k^2 for k in 1:30]
+        @test resum(Richardson(10; depth = 3), a) ≈ richardson(a, 10; depth = 3)
+    end
+
     @testset "kwargs forwarded to underlying call" begin
         # rtol forwarded; loose tol shouldn't make this fail catastrophically.
         v = resum(BorelPade(10, 10; rtol = 1e-3), a_stieltjes)

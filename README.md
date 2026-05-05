@@ -18,7 +18,7 @@ Borel-summable result. All methods are generic over the input element type —
 ## Key features
 
 - Element-type generic: `Float64`, `BigFloat`, and complex variants are all first-class.
-- Multiple resummation families: Shanks, Padé, Borel / Borel–Le Roy / Borel–Padé / conformal Borel–Padé, and optimal-truncation.
+- Multiple resummation families: Shanks, Richardson, Padé, Borel / Borel–Le Roy / Borel–Padé / conformal Borel–Padé, and optimal-truncation.
 - Both a functional API and a unified `resum(::AbstractResummation, a)` dispatch layer.
 
 ## References
@@ -53,6 +53,7 @@ using Resurgence
 | Method | Functional API | Tag (for `resum`) |
 |---|---|---|
 | Shanks transformation (with iterated depth) | `shanks(a, n; depth)` | `Shanks(n; depth)` |
+| Richardson extrapolation (with iterated depth) | `richardson(a, n; depth)` | `Richardson(n; depth)` |
 | Padé approximant `[n/m]` | `pade(a, m, n)`, `pade_value(a, m, n, x)` | `Pade(m, n; x)` |
 | Borel transform | `borel_transform(a)` | — |
 | Borel–Le Roy transform | `borel_leroy_transform(a, b)` | — |
