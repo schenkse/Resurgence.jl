@@ -17,7 +17,18 @@
 Forward conformal map `w(t) = (√(1 + t/a) - 1) / (√(1 + t/a) + 1)`. The
 parameter `a > 0` is the (assumed) location of the nearest Borel-plane
 singularity on the negative real axis at `t = -a`.
+
+For real `t` in the cut region `t < -a`, the result is complex (the map
+sends the cut t-plane to the unit disk). Real `t ≥ -a` returns a real value;
+complex `t` is handled directly.
 """
+function conformal_map(t::Real; a::Real = 1)
+    a > 0 || throw(ArgumentError("a must be positive (got $a)"))
+    arg = 1 + t / a
+    s = arg ≥ 0 ? sqrt(arg) : sqrt(complex(arg))
+    return (s - 1) / (s + 1)
+end
+
 function conformal_map(t::Number; a::Real = 1)
     a > 0 || throw(ArgumentError("a must be positive (got $a)"))
     s = sqrt(1 + t / a)

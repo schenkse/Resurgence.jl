@@ -18,6 +18,25 @@ using Resurgence
         @test_throws ArgumentError inverse_conformal_map(0.5; a = 0.0)
     end
 
+    @testset "real t in the cut region returns complex" begin
+        # t < -a sits on the cut; the map should return a complex value, not throw.
+        w = conformal_map(-2.0; a = 1.0)
+        @test w isa Complex
+        @test inverse_conformal_map(w; a = 1.0) ≈ -2.0
+    end
+
+    @testset "real t in the regular region stays real" begin
+        # t > -a: the result should still be real-valued (no spurious promotion).
+        w = conformal_map(0.5; a = 1.0)
+        @test w isa Real
+    end
+
+    @testset "complex t passes through" begin
+        w = conformal_map(0.5 + 0.1im; a = 1.0)
+        @test w isa Complex
+        @test inverse_conformal_map(w; a = 1.0) ≈ 0.5 + 0.1im
+    end
+
     @testset "conformal_reseries reproduces series at small w" begin
         # B(t) = 1/(1+t)  has coefficients (-1)^k.
         N = 12
