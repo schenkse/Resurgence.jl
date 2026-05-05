@@ -50,4 +50,17 @@ using Resurgence
         approx = sum(c[k+1] * w0^k for k in 0:N)
         @test isapprox(approx, direct; atol = 1e-6)
     end
+
+    @testset "conformal_reseries Complex eltype" begin
+        # Same setup but with complex `b`. Composition is linear in b, so
+        # multiplying b by a complex constant scales the result identically.
+        N = 12
+        b_real = Float64[(-1.0)^k for k in 0:N]
+        b_cplx = ComplexF64.(b_real) .* (1 + 0.1im)
+        c = conformal_reseries(b_cplx, 1.0, N)
+        @test eltype(c) === ComplexF64
+        # Compare with the real reseries scaled by (1 + 0.1im).
+        c_real = conformal_reseries(b_real, 1.0, N)
+        @test c ≈ c_real .* (1 + 0.1im)
+    end
 end

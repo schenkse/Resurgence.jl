@@ -31,6 +31,16 @@ using Resurgence
         @test abs(v - exp(BigFloat("0.5"))) < BigFloat("1e-9")
     end
 
+    @testset "Complex eltype" begin
+        # Geometric series 1 + z + z² + … with [0/1] is exactly 1/(1-z),
+        # which is well-defined for any z ≠ 1, real or complex.
+        a = ones(ComplexF64, 6)
+        x = 0.5 + 0.1im
+        v = pade_value(a, 0, 1, x)
+        @test v isa ComplexF64
+        @test v ≈ 1 / (1 - x)
+    end
+
     @testset "BigFloat rank-deficient fallback" begin
         # Borel transform of the Stieltjes series is exactly 1/(1+t), a degree-1
         # rational. Padé [n/m] with n,m ≥ 1 is therefore rank-deficient and the

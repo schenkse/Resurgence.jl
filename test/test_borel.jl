@@ -49,4 +49,23 @@ using Resurgence
         r = borel_ratios(b)
         @test eltype(r) === BigFloat
     end
+
+    @testset "Complex eltype" begin
+        # Type-genericity smoke test: complex `a` should round-trip through
+        # the Borel transforms preserving ComplexF64 and reducing correctly.
+        a = ComplexF64[1 + 0im, 2 + 1im, 4 - 1im, 6 + 2im, 8]
+        B = borel_transform(a)
+        @test eltype(B) === ComplexF64
+        # B[k] = a[k] / k!
+        @test B ≈ a ./ Float64[factorial(k) for k in 0:length(a)-1]
+
+        # borel_leroy_transform at b=0 must agree with borel_transform.
+        Bb = borel_leroy_transform(a, 0.0)
+        @test eltype(Bb) === ComplexF64
+        @test Bb ≈ B
+
+        # borel_ratios on complex input preserves ComplexF64.
+        r = borel_ratios(B)
+        @test eltype(r) === ComplexF64
+    end
 end

@@ -51,4 +51,16 @@ using Resurgence
         @test isfinite(s)
         @test s ≈ sum(a[1:4])
     end
+
+    @testset "Complex eltype" begin
+        # Same Leibniz series, scaled by a complex constant; Shanks is
+        # entirely linear in `a`, so the result must be (1 + 0.1im) × real.
+        N = 30
+        a_real = Float64[4 * (-1.0)^k / (2k + 1) for k in 0:N-1]
+        a_cplx = ComplexF64.(a_real) .* (1 + 0.1im)
+        s_real = shanks(a_real, 5; depth = 3)
+        s_cplx = shanks(a_cplx, 5; depth = 3)
+        @test s_cplx isa ComplexF64
+        @test s_cplx ≈ s_real * (1 + 0.1im)
+    end
 end

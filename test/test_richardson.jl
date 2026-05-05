@@ -41,4 +41,16 @@ using Resurgence
         @test r isa BigFloat
         @test abs(r - BigFloat(π)^2 / 6) < 1e-8
     end
+
+    @testset "Complex eltype" begin
+        # Richardson is linear in `a`; scaling by a complex constant scales
+        # the result identically. Smoke-test type-genericity, not numerics.
+        N = 30
+        a_real = Float64[1 / k^2 for k in 1:N]
+        a_cplx = ComplexF64.(a_real) .* (1 + 0.1im)
+        r_real = richardson(a_real, 10; depth = 5)
+        r_cplx = richardson(a_cplx, 10; depth = 5)
+        @test r_cplx isa ComplexF64
+        @test r_cplx ≈ r_real * (1 + 0.1im)
+    end
 end
