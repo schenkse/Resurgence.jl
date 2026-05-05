@@ -27,4 +27,28 @@ using Resurgence
         @test s isa BigFloat
         @test abs(s - BigFloat(π)) < 1e-3
     end
+
+    @testset "converged tail does not divide by zero" begin
+        # Series with all-zero tail: partial-sum differences are identically 0,
+        # the Shanks denominator vanishes. Expect the partial sum (1.0), not NaN.
+        a = [1.0, 0.0, 0.0, 0.0]
+        s1 = shanks(a, 2)
+        @test isfinite(s1)
+        @test s1 ≈ 1.0
+
+        # Same with iterated depth (needs n ≥ depth+1 for the iter buffer).
+        a2 = zeros(8); a2[1] = 1.0
+        s2 = shanks(a2, 3; depth = 2)
+        @test isfinite(s2)
+        @test s2 ≈ 1.0
+    end
+
+    @testset "linear partial sums (constant tail) return the partial sum" begin
+        # Constant a[k] = c ⇒ Aₙ linear in n ⇒ d1 == d2; Shanks denominator
+        # vanishes. Implementation falls back to the partial sum.
+        a = fill(0.5, 6)
+        s = shanks(a, 3)
+        @test isfinite(s)
+        @test s ≈ sum(a[1:4])
+    end
 end

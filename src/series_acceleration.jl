@@ -12,6 +12,11 @@ single-application formula is
 
 For higher `depth`, the transformation is applied to the sequence of Shanks
 values obtained from the previous round.
+
+When consecutive partial-sum differences match exactly (the series has
+effectively converged, or has a constant tail), the Shanks denominator
+vanishes; the implementation returns the current partial sum in that case
+rather than `NaN`/`Inf`.
 """
 function shanks(a::AbstractVector{T}, n::Integer; depth::Integer = 1) where {T<:Number}
     depth ≥ 1 || throw(ArgumentError("depth must be ≥ 1"))
@@ -31,7 +36,9 @@ function _shanks_once(a::AbstractVector{T}, n::Integer) where {T<:Number}
     Anp = sum(@view a[1:n+1])
     d1 = Anp - An
     d2 = An - Anm
-    return Anp - d1^2 / (d1 - d2)
+    den = d1 - d2
+    iszero(den) && return Anp
+    return Anp - d1^2 / den
 end
 
 function _shanks_iter(a::AbstractVector{T}, n::Integer, depth::Integer) where {T<:Number}
@@ -54,7 +61,8 @@ function _shanks_iter(a::AbstractVector{T}, n::Integer, depth::Integer) where {T
         @inbounds for k in 2:m-1
             d1 = cur[k+1] - cur[k]
             d2 = cur[k] - cur[k-1]
-            nxt[k-1] = cur[k+1] - d1^2 / (d1 - d2)
+            den = d1 - d2
+            nxt[k-1] = iszero(den) ? cur[k+1] : cur[k+1] - d1^2 / den
         end
         cur = nxt
     end
