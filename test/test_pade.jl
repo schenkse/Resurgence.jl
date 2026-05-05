@@ -30,4 +30,18 @@ using Resurgence
         # error scales like the next neglected coefficient, ~1e-10.
         @test abs(v - exp(BigFloat("0.5"))) < BigFloat("1e-9")
     end
+
+    @testset "BigFloat rank-deficient fallback" begin
+        # Borel transform of the Stieltjes series is exactly 1/(1+t), a degree-1
+        # rational. Padé [n/m] with n,m ≥ 1 is therefore rank-deficient and the
+        # LU fast path throws SingularException; the catch branch routes through
+        # `pinv`, which only works on BigFloat once GenericLinearAlgebra brings
+        # in a generic SVD. This test guards that the fallback path stays alive.
+        b = BigFloat[(-1)^k for k in 0:6]    # Borel coefficients of 1/(1+t)
+        # 1/(1+t) at t = 1/2 is 2/3
+        v = pade_value(b, 2, 2, BigFloat("0.5"))
+        @test v isa BigFloat
+        @test isfinite(v)
+        @test abs(v - BigFloat(2) / 3) < BigFloat("1e-30")
+    end
 end

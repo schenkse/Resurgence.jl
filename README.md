@@ -12,12 +12,13 @@ Borel-summable result. All methods are generic over the input element type —
 [![PolynomialRoots v1](https://img.shields.io/badge/PolynomialRoots-v1-blue)](https://github.com/giordano/PolynomialRoots.jl)
 [![QuadGK v2](https://img.shields.io/badge/QuadGK-v2-blue)](https://github.com/JuliaMath/QuadGK.jl)
 [![SpecialFunctions v2](https://img.shields.io/badge/SpecialFunctions-v2-blue)](https://github.com/JuliaMath/SpecialFunctions.jl)
+[![GenericLinearAlgebra v0.4](https://img.shields.io/badge/GenericLinearAlgebra-v0.4-blue)](https://github.com/JuliaLinearAlgebra/GenericLinearAlgebra.jl)
 
 > **Built with LLMs:** This project was developed with the help of AI coding tools, primarily [Claude Code](https://claude.ai/code) by Anthropic. All code has been reviewed and is maintained by the author.
 
 ## Key features
 
-- Element-type generic: `Float64`, `BigFloat`, and complex variants are all first-class.
+- Element-type generic: `Float64`, `BigFloat`, and complex variants are all first-class. (Generic SVD for rank-deficient `BigFloat` Padé fits is provided by [GenericLinearAlgebra.jl](https://github.com/JuliaLinearAlgebra/GenericLinearAlgebra.jl).)
 - Multiple resummation families: Shanks, Richardson, Padé, Borel / Borel–Le Roy / Borel–Padé / conformal Borel–Padé, and optimal-truncation.
 - Both a functional API and a unified `resum(::AbstractResummation, a)` dispatch layer.
 

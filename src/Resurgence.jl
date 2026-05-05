@@ -1,6 +1,7 @@
 module Resurgence
 
 using LinearAlgebra
+using GenericLinearAlgebra  # extends svd/pinv to BigFloat (rank-deficient pade fallback)
 using Polynomials
 using PolynomialRoots
 using QuadGK

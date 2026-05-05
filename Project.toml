@@ -1,18 +1,20 @@
 name = "Resurgence"
 uuid = "0d9a2b1e-9c4f-4f2a-9b3a-2f5b7e8f9a01"
-authors = ["Sebastian Schenk <schenk.seb@gmail.com>"]
 version = "0.1.2"
+authors = ["Sebastian Schenk <schenk.seb@gmail.com>"]
 
 [deps]
+GenericLinearAlgebra = "14197337-ba66-59df-a3e3-ca00e7dcff7a"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-Polynomials = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
 PolynomialRoots = "3a141323-8675-5d76-9d11-e1df1406c778"
+Polynomials = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
 QuadGK = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [compat]
-Polynomials = "4"
+GenericLinearAlgebra = "0.4"
 PolynomialRoots = "1"
+Polynomials = "4"
 QuadGK = "2"
 SpecialFunctions = "2"
 julia = "1.10"
