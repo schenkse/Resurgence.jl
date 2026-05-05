@@ -12,4 +12,5 @@ using Resurgence
     include("test_conformal.jl")
     include("test_truncation.jl")
     include("test_api.jl")
+    include("test_aqua.jl")
 end
