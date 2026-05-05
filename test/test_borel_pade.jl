@@ -41,6 +41,36 @@ stieltjes_coeffs(::Type{T}, N) where {T} = T[(-1)^k * factorial(big(k)) for k in
         a = Float64.(stieltjes_coeffs(BigFloat, 5))
         @test_throws ArgumentError borel_pade(a; n = 5, m = 5, x = 1)
     end
+
+    @testset "ComplexF64 coefficient vector" begin
+        a = ComplexF64.(stieltjes_coeffs(BigFloat, 25))
+        v = borel_pade(a; n = 10, m = 10, x = ComplexF64(1))
+        @test v isa Complex
+        @test isapprox(v, complex(STIELTJES_AT_1); atol = 1e-8)
+    end
+
+    @testset "real coefficients with complex x" begin
+        a = Float64.(stieltjes_coeffs(BigFloat, 25))
+        v = borel_pade(a; n = 10, m = 10, x = 1.0 + 0.01im)
+        @test v isa Complex
+        @test isfinite(real(v)) && isfinite(imag(v))
+        # small imaginary perturbation ⇒ result close to the real Borel sum
+        @test abs(v - STIELTJES_AT_1) < 0.05
+    end
+
+    @testset "Complex{BigFloat} propagates" begin
+        a = Complex{BigFloat}.(stieltjes_coeffs(BigFloat, 25))
+        v = borel_pade(a; n = 10, m = 10, x = Complex{BigFloat}(1))
+        @test v isa Complex{BigFloat}
+        @test isapprox(v, complex(BigFloat(STIELTJES_AT_1)); atol = BigFloat("1e-8"))
+    end
+
+    @testset "regularize_poles requires real positive x" begin
+        a = Float64.(stieltjes_coeffs(BigFloat, 25))
+        @test_throws ArgumentError borel_pade(a; n = 10, m = 10,
+                                              x = 1.0 + 0.01im,
+                                              regularize_poles = true)
+    end
 end
 
 @testset "borel_leroy_pade — Stieltjes series" begin
@@ -59,6 +89,13 @@ end
         # Should still be in the right ballpark — not exact for a generic b.
         @test isapprox(v, STIELTJES_AT_1; atol = 1e-3)
     end
+
+    @testset "ComplexF64 coefficients" begin
+        a = ComplexF64.(stieltjes_coeffs(BigFloat, 25))
+        v = borel_leroy_pade(a; n = 10, m = 10, b = 1e-6, x = ComplexF64(1))
+        @test v isa Complex
+        @test isapprox(v, complex(STIELTJES_AT_1); atol = 1e-5)
+    end
 end
 
 @testset "conformal_borel_pade — Stieltjes series" begin
@@ -66,5 +103,12 @@ end
         a = Float64.(stieltjes_coeffs(BigFloat, 25))
         v = conformal_borel_pade(a; n = 10, m = 10, x = 1, sing = 1)
         @test isapprox(v, STIELTJES_AT_1; atol = 1e-6)
+    end
+
+    @testset "ComplexF64 coefficients" begin
+        a = ComplexF64.(stieltjes_coeffs(BigFloat, 25))
+        v = conformal_borel_pade(a; n = 10, m = 10, x = ComplexF64(1), sing = 1)
+        @test v isa Complex
+        @test isapprox(v, complex(STIELTJES_AT_1); atol = 1e-6)
     end
 end

@@ -24,15 +24,15 @@ the value.
 Requires `length(a) ≥ n + m + 1`.
 """
 function borel_pade(a::AbstractVector{T};
-                    n::Integer, m::Integer, x::Real = 1,
+                    n::Integer, m::Integer, x = 1,
                     regularize_poles::Bool = false,
                     ε::Union{Real,Nothing} = nothing,
                     return_error::Bool = false,
-                    quad_kwargs...) where {T<:Real}
+                    quad_kwargs...) where {T<:Number}
     length(a) ≥ n + m + 1 ||
         throw(ArgumentError("borel_pade needs length(a) ≥ n+m+1 = $(n+m+1)"))
-    if regularize_poles && x ≤ 0
-        throw(ArgumentError("regularize_poles=true requires x > 0 (got $x)"))
+    if regularize_poles && !(x isa Real && x > 0)
+        throw(ArgumentError("regularize_poles=true requires positive real x (got $x)"))
     end
     Ba = borel_transform(a[1:n+m+1])
     Bp, Bq = pade(Ba, m, n)
@@ -69,9 +69,9 @@ matches the original code. `quad_kwargs` are forwarded to `QuadGK.quadgk`.
 """
 function borel_leroy_pade(a::AbstractVector{T};
                           n::Integer, m::Integer,
-                          b::Real = -1//2, x::Real = 1,
+                          b::Real = -1//2, x = 1,
                           return_error::Bool = false,
-                          quad_kwargs...) where {T<:Real}
+                          quad_kwargs...) where {T<:Number}
     length(a) ≥ n + m + 1 ||
         throw(ArgumentError("borel_leroy_pade needs length(a) ≥ n+m+1 = $(n+m+1)"))
     Ba = borel_leroy_transform(a[1:n+m+1], b)
@@ -97,10 +97,10 @@ Conformal-Borel–Padé resummation:
 transform on the negative real axis (i.e. the singularity sits at `t = -sing`).
 """
 function conformal_borel_pade(a::AbstractVector{T};
-                              n::Integer, m::Integer, x::Real = 1,
+                              n::Integer, m::Integer, x = 1,
                               sing::Real = 1,
                               return_error::Bool = false,
-                              quad_kwargs...) where {T<:Real}
+                              quad_kwargs...) where {T<:Number}
     length(a) ≥ n + m + 1 ||
         throw(ArgumentError("conformal_borel_pade needs length(a) ≥ n+m+1 = $(n+m+1)"))
     Ba = borel_transform(a[1:n+m+1])
