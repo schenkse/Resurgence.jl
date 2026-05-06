@@ -57,35 +57,39 @@ intermediate symbolic engine is required.
 """
 function conformal_reseries(b::AbstractVector{T}, a::Real, N::Integer) where {T<:Number}
     N ≥ 0 || throw(ArgumentError("N must be non-negative"))
-    R = real(T)
     aT = T(a)
     # t(w) = 4a · w · (1-w)^(-2) = 4a · Σ_{k≥0} (k+1) w^{k+1}
-    # Build the polynomial representation of t(w) truncated at order N.
-    tw_coeffs = zeros(T, N + 1)
+    # Build the coefficient vector of t(w) truncated at order N.
+    tw = zeros(T, N + 1)
     @inbounds for k in 0:N-1
-        tw_coeffs[k+2] = T(4) * aT * T(k + 1)
+        tw[k+2] = T(4) * aT * T(k + 1)
     end
-    tw = Polynomial(tw_coeffs)
 
-    # Accumulate B(t(w)) = Σ_k b_k · t(w)^k, truncating each power at order N.
+    # Accumulate B(t(w)) = Σ_k b_k · t(w)^k, truncating each power at order N
+    # via a direct convolution that never materialises the discarded high-order
+    # coefficients.
     out = zeros(T, N + 1)
     out[1] = b[1]                         # k = 0 contribution
-    pow = Polynomial([one(T)])            # t(w)^0
+    pow = zeros(T, N + 1); pow[1] = one(T)   # t(w)^0
     @inbounds for k in 1:length(b)-1
-        pow = _truncate(pow * tw, N)
-        c = Polynomials.coeffs(pow)
-        # add b[k+1] * c into out, padding if shorter than out
-        for i in eachindex(c)
-            out[i] += b[k+1] * c[i]
+        pow = _mul_trunc(pow, tw, N)
+        bk = b[k+1]
+        for i in eachindex(pow)
+            out[i] += bk * pow[i]
         end
     end
     return out
 end
 
-function _truncate(p::Polynomial{T}, N::Integer) where {T}
-    c = Polynomials.coeffs(p)
-    if length(c) ≤ N + 1
-        return p
+function _mul_trunc(p::AbstractVector{T}, q::AbstractVector{T}, N::Integer) where {T}
+    out = zeros(T, N + 1)
+    @inbounds for i in eachindex(p)
+        pi_ = p[i]
+        iszero(pi_) && continue
+        ki_max = min(N - (i - 1), length(q) - 1)
+        for j in 1:ki_max+1
+            out[(i - 1) + j] += pi_ * q[j]
+        end
     end
-    return Polynomial(c[1:N+1])
+    return out
 end
