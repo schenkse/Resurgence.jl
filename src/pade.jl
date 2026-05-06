@@ -51,6 +51,10 @@ end
 
 Evaluate the Padé approximant `[n/m]` of `a` at `x`, i.e. return `p(x) / q(x)`
 where `(p, q) = pade(a, n, m)`.
+
+Note: each call rebuilds the approximant from scratch via `pade`. To sweep
+over many `x` for the same series, call `(p, q) = pade(a, n, m)` once and
+evaluate `p(x) / q(x)` directly to avoid repeating the linear solve.
 """
 function pade_value(a::AbstractVector{T}, n::Integer, m::Integer, x) where {T<:Number}
     p, q = pade(a, n, m)
