@@ -24,6 +24,7 @@ export borel_transform, borel_leroy_transform, borel_ratios
 export conformal_map, inverse_conformal_map, conformal_reseries
 export borel_pade, borel_leroy_pade, conformal_borel_pade
 export optimal_truncation, superasymptotic_remainder
+export chop!, sparsify!
 
 # unified API
 export AbstractResummation, Shanks, Richardson, Pade, BorelPade, BorelLeRoyPade, ConformalBorelPade
