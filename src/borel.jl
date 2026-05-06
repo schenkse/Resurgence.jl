@@ -51,5 +51,7 @@ preserved (no silent demotion to `Float64`).
 """
 function borel_ratios(b::AbstractVector{T}) where {T<:Number}
     length(b) ≥ 2 || throw(ArgumentError("need length(b) ≥ 2"))
+    any(iszero, @view b[1:end-1]) &&
+        throw(ArgumentError("borel_ratios: divisor is zero (b[k] = 0 for some k < length(b))"))
     return b[2:end] ./ b[1:end-1]
 end

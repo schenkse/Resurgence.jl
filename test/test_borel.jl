@@ -50,6 +50,11 @@ using Resurgence
         @test eltype(r) === BigFloat
     end
 
+    @testset "borel_ratios rejects zero divisors" begin
+        @test_throws ArgumentError borel_ratios([1.0, 0.0, 1.0])
+        @test_throws ArgumentError borel_ratios([0.0, 1.0])
+    end
+
     @testset "Complex eltype" begin
         # Type-genericity smoke test: complex `a` should round-trip through
         # the Borel transforms preserving ComplexF64 and reducing correctly.
