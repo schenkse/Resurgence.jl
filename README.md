@@ -29,6 +29,9 @@ Borel-summable result. All methods are generic over the input element type —
 
 ## Setup
 
+> Resurgence.jl is not yet registered in Julia's General registry, so
+> `Pkg.add("Resurgence")` will not work — install from GitHub for now.
+
 ### Install from GitHub
 
 ```julia
