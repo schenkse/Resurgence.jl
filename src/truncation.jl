@@ -15,8 +15,21 @@ result.
 """
 function optimal_truncation(a::AbstractVector{T}) where {T<:Number}
     isempty(a) && throw(ArgumentError("series must be non-empty"))
-    Nstar = argmin(abs.(a))
+    Nstar = _argmin_abs(a)
     return Nstar, sum(@view a[1:Nstar]), abs(a[Nstar])
+end
+
+function _argmin_abs(a::AbstractVector)
+    idx = firstindex(a)
+    m = abs(a[idx])
+    @inbounds for i in idx+1:lastindex(a)
+        ai = abs(a[i])
+        if ai < m
+            m = ai
+            idx = i
+        end
+    end
+    return idx
 end
 
 """
@@ -28,5 +41,5 @@ This is the textbook *superasymptotic* error estimate.
 """
 function superasymptotic_remainder(a::AbstractVector{T}) where {T<:Number}
     isempty(a) && throw(ArgumentError("series must be non-empty"))
-    return abs(a[argmin(abs.(a))])
+    return abs(a[_argmin_abs(a)])
 end
