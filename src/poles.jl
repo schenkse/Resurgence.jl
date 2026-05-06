@@ -5,7 +5,7 @@ Return the real-valued roots of the polynomial whose coefficients are
 `coeffs` (in `Polynomials.jl` ordering: constant term first).
 """
 function obtain_poles_real(coeffs::AbstractVector{<:Number})
-    rts = PolynomialRoots.roots(collect(coeffs))
+    rts = PolynomialRoots.roots(coeffs)
     return real.(filter(isreal, rts))
 end
 
@@ -37,7 +37,7 @@ return the resulting polynomial as a `Polynomial`, normalized so its constant
 term is `1`.
 """
 function poles_regularized(coeffs::AbstractVector{<:Number}, ε::Real)
-    rts = PolynomialRoots.roots(collect(coeffs))
+    rts = PolynomialRoots.roots(coeffs)
     shifted = move_poles(rts, ε)
     poly = fromroots(Polynomial, shifted)
     pc = Polynomials.coeffs(poly)
