@@ -1,6 +1,6 @@
 name = "Resurgence"
 uuid = "0d9a2b1e-9c4f-4f2a-9b3a-2f5b7e8f9a01"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Sebastian Schenk <schenk.seb@gmail.com>"]
 
 [deps]
