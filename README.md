@@ -19,7 +19,7 @@ Borel-summable result. All methods are generic over the input element type —
 ## Key features
 
 - Element-type generic: `Float64`, `BigFloat`, and complex variants are all first-class. (Generic SVD for rank-deficient `BigFloat` Padé fits is provided by [GenericLinearAlgebra.jl](https://github.com/JuliaLinearAlgebra/GenericLinearAlgebra.jl).)
-- Multiple resummation families: Shanks, Richardson, Padé (linear and continued-fraction qd), Borel / Borel–Le Roy / Borel–Padé / conformal Borel–Padé, Meijer-G, and optimal-truncation.
+- Multiple resummation families: Shanks, Richardson, Padé (linear, continued-fraction qd, and Hermite/quadratic for algebraic branch points), Borel / Borel–Le Roy / Borel–Padé / conformal Borel–Padé, Meijer-G, and optimal-truncation.
 - Both a functional API and a unified `resum(::AbstractResummation, a)` dispatch layer.
 
 ## References
@@ -60,6 +60,7 @@ using Resurgence
 | Richardson extrapolation (with iterated depth) | `richardson(a, n; depth)` | `Richardson(n; depth)` |
 | Padé approximant `[n/m]` | `pade(a, n, m)`, `pade_value(a, n, m, x)` | `Pade(n, m; x)` |
 | Padé via qd continued fraction (`n == m` or `n + 1 == m`) | `pade_cf(a, n, m)`, `pade_cf_value(a, n, m, x)` | `PadeCF(n, m; x)` |
+| Hermite/quadratic Padé (algebraic branch points) | `hermite_pade(a, n, m, l)`, `hermite_pade_value(a, n, m, l, x; branch)` | `HermitePade(n, m, l; x, branch)` |
 | Borel transform | `borel_transform(a)` | — |
 | Borel–Le Roy transform | `borel_leroy_transform(a, b)` | — |
 | Borel–Padé resummation | `borel_pade(a; n, m, x, ...)` | `BorelPade(n, m; x, ...)` |

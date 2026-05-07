@@ -65,6 +65,22 @@ struct PadeCF{X} <: AbstractResummation
 end
 
 """
+    HermitePade(n, m, l; x = 1, branch = nothing)
+
+Hermite/quadratic Padé tag. `resum(HermitePade(n, m, l; x, branch), a)`
+calls `hermite_pade_value(a, n, m, l, x; branch)`.
+"""
+struct HermitePade{X,B} <: AbstractResummation
+    n::Int
+    m::Int
+    l::Int
+    x::X
+    branch::B
+    HermitePade(n::Integer, m::Integer, l::Integer; x = 1, branch = nothing) =
+        new{typeof(x),typeof(branch)}(Int(n), Int(m), Int(l), x, branch)
+end
+
+"""
     BorelPade(n, m; x = 1, kwargs...)
 
 Borel–Padé tag. `resum(BorelPade(n, m; x, kwargs...), a)` calls
@@ -134,6 +150,7 @@ resum(s::Shanks, a) = shanks(a, s.n; depth = s.depth)
 resum(r::Richardson, a) = richardson(a, r.n; depth = r.depth)
 resum(p::Pade, a) = pade_value(a, p.n, p.m, p.x)
 resum(p::PadeCF, a) = pade_cf_value(a, p.n, p.m, p.x)
+resum(h::HermitePade, a) = hermite_pade_value(a, h.n, h.m, h.l, h.x; branch = h.branch)
 resum(bp::BorelPade, a) = borel_pade(a; n = bp.n, m = bp.m, x = bp.x, bp.kwargs...)
 resum(bl::BorelLeRoyPade, a) =
     borel_leroy_pade(a; n = bl.n, m = bl.m, b = bl.b, x = bl.x, bl.kwargs...)
