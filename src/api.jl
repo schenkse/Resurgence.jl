@@ -52,6 +52,19 @@ struct Pade{X} <: AbstractResummation
 end
 
 """
+    PadeCF(n, m; x = 1)
+
+Continued-fraction Padé tag. `resum(PadeCF(n, m; x), a)` calls
+`pade_cf_value(a, n, m, x)`. Restricted to `n == m` or `n + 1 == m`.
+"""
+struct PadeCF{X} <: AbstractResummation
+    n::Int
+    m::Int
+    x::X
+    PadeCF(n::Integer, m::Integer; x = 1) = new{typeof(x)}(Int(n), Int(m), x)
+end
+
+"""
     BorelPade(n, m; x = 1, kwargs...)
 
 Borel–Padé tag. `resum(BorelPade(n, m; x, kwargs...), a)` calls
@@ -120,6 +133,7 @@ Apply `method` to the formal power series with coefficients `a`.
 resum(s::Shanks, a) = shanks(a, s.n; depth = s.depth)
 resum(r::Richardson, a) = richardson(a, r.n; depth = r.depth)
 resum(p::Pade, a) = pade_value(a, p.n, p.m, p.x)
+resum(p::PadeCF, a) = pade_cf_value(a, p.n, p.m, p.x)
 resum(bp::BorelPade, a) = borel_pade(a; n = bp.n, m = bp.m, x = bp.x, bp.kwargs...)
 resum(bl::BorelLeRoyPade, a) =
     borel_leroy_pade(a; n = bl.n, m = bl.m, b = bl.b, x = bl.x, bl.kwargs...)
