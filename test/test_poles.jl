@@ -21,6 +21,20 @@ using Polynomials: Polynomial, coeffs
         @test out[3] == ComplexF64(0.5, 0.3)         # not shifted
     end
 
+    @testset "move_poles side = -1 shifts down" begin
+        roots = ComplexF64[2.0, -1.0, 0.5 + 0.3im]
+        out = move_poles(roots, 1e-3; side = -1)
+        @test imag(out[1]) ≈ -1e-3
+        @test out[2] == ComplexF64(-1.0, 0.0)
+        @test out[3] == ComplexF64(0.5, 0.3)
+    end
+
+    @testset "move_poles rejects invalid side" begin
+        roots = ComplexF64[2.0]
+        @test_throws ArgumentError move_poles(roots, 1e-3; side = 0)
+        @test_throws ArgumentError move_poles(roots, 1e-3; side = 2)
+    end
+
     @testset "poles_regularized normalizes constant term" begin
         # q(t) = 1 - t  has root t = 1 on the positive real axis.
         qr = poles_regularized([1.0, -1.0], 1e-6)
@@ -28,5 +42,13 @@ using Polynomials: Polynomial, coeffs
         @test c[1] ≈ 1.0
         # Denominator should now have a complex root with small +iε imaginary part.
         @test abs(qr(1.0)) > 0   # no longer vanishes at t=1
+    end
+
+    @testset "poles_regularized side = -1 mirrors side = +1" begin
+        qrp = poles_regularized([1.0, -1.0], 1e-6; side = +1)
+        qrm = poles_regularized([1.0, -1.0], 1e-6; side = -1)
+        # Roots conjugate across the real axis; values at real t are conjugate.
+        @test qrp(0.5) ≈ conj(qrm(0.5))
+        @test qrp(2.0) ≈ conj(qrm(2.0))
     end
 end

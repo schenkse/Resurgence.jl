@@ -96,6 +96,37 @@ struct BorelPade{X,K} <: AbstractResummation
 end
 
 """
+    BorelPadeLateral(n, m; x = 1, side = +1, kwargs...)
+
+Lateral Borel–Padé tag. `resum(BorelPadeLateral(n, m; x, side, kwargs...), a)`
+calls `borel_pade_lateral(a; n, m, x, side, kwargs...)`.
+"""
+struct BorelPadeLateral{X,K} <: AbstractResummation
+    n::Int
+    m::Int
+    x::X
+    side::Int
+    kwargs::K
+    BorelPadeLateral(n::Integer, m::Integer; x = 1, side::Integer = +1, kwargs...) =
+        new{typeof(x),typeof(kwargs)}(Int(n), Int(m), x, Int(side), kwargs)
+end
+
+"""
+    BorelPadeMedian(n, m; x = 1, kwargs...)
+
+Median Borel–Padé tag. `resum(BorelPadeMedian(n, m; x, kwargs...), a)` calls
+`borel_pade_median(a; n, m, x, kwargs...)`.
+"""
+struct BorelPadeMedian{X,K} <: AbstractResummation
+    n::Int
+    m::Int
+    x::X
+    kwargs::K
+    BorelPadeMedian(n::Integer, m::Integer; x = 1, kwargs...) =
+        new{typeof(x),typeof(kwargs)}(Int(n), Int(m), x, kwargs)
+end
+
+"""
     BorelLeRoyPade(n, m; b = -1//2, x = 1, kwargs...)
 
 Borel–Le Roy–Padé tag. `resum(BorelLeRoyPade(n, m; b, x, kwargs...), a)` calls
@@ -152,6 +183,10 @@ resum(p::Pade, a) = pade_value(a, p.n, p.m, p.x)
 resum(p::PadeCF, a) = pade_cf_value(a, p.n, p.m, p.x)
 resum(h::HermitePade, a) = hermite_pade_value(a, h.n, h.m, h.l, h.x; branch = h.branch)
 resum(bp::BorelPade, a) = borel_pade(a; n = bp.n, m = bp.m, x = bp.x, bp.kwargs...)
+resum(bp::BorelPadeLateral, a) =
+    borel_pade_lateral(a; n = bp.n, m = bp.m, x = bp.x, side = bp.side, bp.kwargs...)
+resum(bp::BorelPadeMedian, a) =
+    borel_pade_median(a; n = bp.n, m = bp.m, x = bp.x, bp.kwargs...)
 resum(bl::BorelLeRoyPade, a) =
     borel_leroy_pade(a; n = bl.n, m = bl.m, b = bl.b, x = bl.x, bl.kwargs...)
 resum(cb::ConformalBorelPade, a) =

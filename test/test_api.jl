@@ -10,6 +10,16 @@ using Resurgence
         @test v ≈ direct
     end
 
+    @testset "BorelPadeLateral / BorelPadeMedian dispatch" begin
+        a_unsigned = Float64[Float64(factorial(big(k))) for k in 0:24]
+        v_lat_tag = resum(BorelPadeLateral(10, 10; x = 1, side = +1), a_unsigned)
+        v_lat_direct = borel_pade_lateral(a_unsigned; n = 10, m = 10, x = 1, side = +1)
+        @test v_lat_tag ≈ v_lat_direct
+        v_med_tag = resum(BorelPadeMedian(10, 10; x = 1), a_unsigned)
+        v_med_direct = borel_pade_median(a_unsigned; n = 10, m = 10, x = 1)
+        @test v_med_tag ≈ v_med_direct
+    end
+
     @testset "BorelLeRoyPade dispatches to borel_leroy_pade" begin
         # b ≠ 0 keeps the Padé linear system non-singular on this exact-rational
         # Borel transform.

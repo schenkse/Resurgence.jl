@@ -64,7 +64,11 @@ using Resurgence
 | Borel transform | `borel_transform(a)` | — |
 | Borel–Le Roy transform | `borel_leroy_transform(a, b)` | — |
 | Borel–Padé resummation | `borel_pade(a; n, m, x, ...)` | `BorelPade(n, m; x, ...)` |
+| Lateral Borel–Padé sum (`side = ±1`) | `borel_pade_lateral(a; n, m, x, side, ...)` | `BorelPadeLateral(n, m; x, side, ...)` |
+| Median Borel–Padé sum `(L⁺+L⁻)/2` | `borel_pade_median(a; n, m, x, ...)` | `BorelPadeMedian(n, m; x, ...)` |
+| Borel–Padé Stokes discontinuity `(L⁺−L⁻)/(2i)` | `borel_pade_discontinuity(a; n, m, x, ...)` | — |
 | Borel–Le Roy–Padé resummation | `borel_leroy_pade(a; n, m, b, x, ...)` | `BorelLeRoyPade(n, m; b, x, ...)` |
+| Lateral / median / discontinuity Borel–Le Roy–Padé | `borel_leroy_pade_lateral`, `_median`, `_discontinuity` | — |
 | Conformal-Borel–Padé resummation | `conformal_borel_pade(a; n, m, x, sing, ...)` | `ConformalBorelPade(n, m; x, sing, ...)` |
 | Meijer-G resummation (Slater-collapsed onto pFq) | `borel_meijerg(a; n, x, ...)` | `MeijerG(n; x, ...)` |
 | Optimal-truncation / superasymptotics | `optimal_truncation(a)`, `superasymptotic_remainder(a)` | — |
@@ -95,6 +99,39 @@ borel_pade(ab; n = 20, m = 20, x = BigFloat(1))  # ≈ 0.59634736…
 
 See [`examples/stieltjes.jl`](examples/stieltjes.jl) for a side-by-side
 comparison of all methods.
+
+## Non-Borel-summable series and lateral sums
+
+When the Borel transform has a singularity on the *positive* real axis (i.e.
+the series is not Borel-summable in the conventional sense), the Laplace
+integral is ill-defined; deforming the contour above (`L⁺`) or below (`L⁻`)
+the singularity gives two distinct lateral sums, each complex-valued. Their
+average is the ambiguity-free median sum, and their difference exposes the
+Stokes discontinuity.
+
+Driver: `aₖ = k!`. Borel transform `1/(1−t)` has a pole at `t = 1`. The
+median sum recovers the Cauchy principal value `Ei(1)/e ≈ 0.6972`, and the
+Stokes discontinuity has magnitude `π/e ≈ 1.1557`.
+
+```julia
+using Resurgence
+
+a = Float64[Float64(factorial(big(k))) for k in 0:24]   # a_k = k!
+
+borel_pade_median(a; n = 10, m = 10, x = 1)         # ≈  0.69717 + 0im
+borel_pade_discontinuity(a; n = 10, m = 10, x = 1)  # ≈ -1.15573 + 0im
+
+# The two lateral sums are complex conjugates of each other for real `a`.
+borel_pade_lateral(a; n = 10, m = 10, x = 1, side = +1)   # ≈ 0.69717 - 1.15573im
+borel_pade_lateral(a; n = 10, m = 10, x = 1, side = -1)   # ≈ 0.69717 + 1.15573im
+```
+
+Convention: `side = +1` shifts the offending Padé poles by `+iε` (upper
+half-plane), so the integration contour passes *below* them — matching the
+lateral sum traditionally written `S_θ⁻` in the resurgence literature.
+The discontinuity is computed as `(L_{+1} − L_{−1}) / (2i) = (S_θ⁻ − S_θ⁺) / (2i)`,
+which has magnitude equal to the textbook `(S_θ⁺ − S_θ⁻) / (2i)` but the
+opposite sign. Negate if you want the textbook convention.
 
 ## Tests
 
