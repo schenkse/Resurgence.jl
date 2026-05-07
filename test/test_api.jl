@@ -24,6 +24,15 @@ using Resurgence
         @test v ≈ v_direct
     end
 
+    @testset "MeijerG dispatches to borel_meijerg" begin
+        # Stieltjes itself is rank-degenerate for borel_meijerg; use the
+        # shifted (k+1)! variant to drive a clean rational fit.
+        a_shifted = Float64[(-1.0)^k * Float64(factorial(big(k + 1))) for k in 0:24]
+        v_tag = resum(MeijerG(3), a_shifted)
+        v_direct = borel_meijerg(a_shifted; n = 3, x = 1)
+        @test v_tag ≈ v_direct
+    end
+
     @testset "Pade dispatches to pade_value" begin
         a = ones(Float64, 6)
         v = resum(Pade(0, 1; x = 0.5), a)

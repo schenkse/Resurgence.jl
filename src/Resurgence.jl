@@ -2,6 +2,7 @@ module Resurgence
 
 using LinearAlgebra
 using GenericLinearAlgebra  # extends svd/pinv to BigFloat (rank-deficient pade fallback)
+using HypergeometricFunctions
 using Polynomials
 using PolynomialRoots
 using QuadGK
@@ -14,6 +15,7 @@ include("pade.jl")
 include("borel.jl")
 include("conformal.jl")
 include("borel_pade.jl")
+include("meijerg.jl")
 include("truncation.jl")
 include("api.jl")
 
@@ -23,11 +25,13 @@ export pade, pade_value
 export borel_transform, borel_leroy_transform, borel_ratios
 export conformal_map, inverse_conformal_map, conformal_reseries
 export borel_pade, borel_leroy_pade, conformal_borel_pade
+export borel_meijerg
 export optimal_truncation, superasymptotic_remainder
 export chop!, sparsify!
 
 # unified API
-export AbstractResummation, Shanks, Richardson, Pade, BorelPade, BorelLeRoyPade, ConformalBorelPade
+export AbstractResummation, Shanks, Richardson, Pade, BorelPade, BorelLeRoyPade, ConformalBorelPade,
+    MeijerG
 export resum
 
 end # module

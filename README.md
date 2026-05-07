@@ -19,7 +19,7 @@ Borel-summable result. All methods are generic over the input element type —
 ## Key features
 
 - Element-type generic: `Float64`, `BigFloat`, and complex variants are all first-class. (Generic SVD for rank-deficient `BigFloat` Padé fits is provided by [GenericLinearAlgebra.jl](https://github.com/JuliaLinearAlgebra/GenericLinearAlgebra.jl).)
-- Multiple resummation families: Shanks, Richardson, Padé, Borel / Borel–Le Roy / Borel–Padé / conformal Borel–Padé, and optimal-truncation.
+- Multiple resummation families: Shanks, Richardson, Padé, Borel / Borel–Le Roy / Borel–Padé / conformal Borel–Padé, Meijer-G, and optimal-truncation.
 - Both a functional API and a unified `resum(::AbstractResummation, a)` dispatch layer.
 
 ## References
@@ -64,6 +64,7 @@ using Resurgence
 | Borel–Padé resummation | `borel_pade(a; n, m, x, ...)` | `BorelPade(n, m; x, ...)` |
 | Borel–Le Roy–Padé resummation | `borel_leroy_pade(a; n, m, b, x, ...)` | `BorelLeRoyPade(n, m; b, x, ...)` |
 | Conformal-Borel–Padé resummation | `conformal_borel_pade(a; n, m, x, sing, ...)` | `ConformalBorelPade(n, m; x, sing, ...)` |
+| Meijer-G resummation (Slater-collapsed onto pFq) | `borel_meijerg(a; n, x, ...)` | `MeijerG(n; x, ...)` |
 | Optimal-truncation / superasymptotics | `optimal_truncation(a)`, `superasymptotic_remainder(a)` | — |
 
 `quadgk` keyword arguments (`rtol`, `atol`, `order`) flow through to the

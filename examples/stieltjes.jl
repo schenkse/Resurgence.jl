@@ -44,3 +44,14 @@ ab = BigFloat[(-1)^k * factorial(big(k)) for k in 0:40]
 vb = borel_pade(ab; n = 20, m = 20, x = BigFloat(1))
 @printf "  Borel–Padé[20/20] (BigFloat)       : %s\n" string(vb)
 @printf "  error vs reference                 : %s\n" string(abs(vb - BigFloat(STIELTJES_AT_1)))
+
+# Meijer-G needs a non-trivial pole structure: Stieltjes' Borel transform is
+# 1/(1+t) (rank-deficient at every fit order), so we use the shifted series
+# a_k = (-1)^k (k+1)! whose Borel transform is 1/(1+t)². Its Borel sum at
+# x = 1 is 1 - e·E_1(1) ≈ 0.40365.
+println()
+println("Meijer-G resummation (driver: a_k = (-1)^k (k+1)!, Borel sum 1 - e·E₁(1)):")
+const SHIFTED_REF = 1.0 - STIELTJES_AT_1
+a_shifted = Float64[(-1.0)^k * Float64(factorial(big(k + 1))) for k in 0:24]
+v_meijerg = borel_meijerg(a_shifted; n = 3, x = 1)
+@printf "  borel_meijerg (n = 3)              : %+.6e   (err %.2e)\n" v_meijerg (v_meijerg - SHIFTED_REF)

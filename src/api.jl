@@ -99,6 +99,20 @@ struct ConformalBorelPade{X,S,K} <: AbstractResummation
 end
 
 """
+    MeijerG(n; x = 1, kwargs...)
+
+Meijer-G resummation tag. `resum(MeijerG(n; x, kwargs...), a)` calls
+`borel_meijerg(a; n, x, kwargs...)`.
+"""
+struct MeijerG{X,K} <: AbstractResummation
+    n::Int
+    x::X
+    kwargs::K
+    MeijerG(n::Integer; x = 1, kwargs...) =
+        new{typeof(x),typeof(kwargs)}(Int(n), x, kwargs)
+end
+
+"""
     resum(method::AbstractResummation, a)
 
 Apply `method` to the formal power series with coefficients `a`.
@@ -111,3 +125,4 @@ resum(bl::BorelLeRoyPade, a) =
     borel_leroy_pade(a; n = bl.n, m = bl.m, b = bl.b, x = bl.x, bl.kwargs...)
 resum(cb::ConformalBorelPade, a) =
     conformal_borel_pade(a; n = cb.n, m = cb.m, x = cb.x, sing = cb.sing, cb.kwargs...)
+resum(mg::MeijerG, a) = borel_meijerg(a; n = mg.n, x = mg.x, mg.kwargs...)
