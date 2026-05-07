@@ -72,6 +72,7 @@ using Resurgence
 | Conformal-Borel–Padé resummation | `conformal_borel_pade(a; n, m, x, sing, ...)` | `ConformalBorelPade(n, m; x, sing, ...)` |
 | Meijer-G resummation (Slater-collapsed onto pFq) | `borel_meijerg(a; n, x, ...)` | `MeijerG(n; x, ...)` |
 | Optimal-truncation / superasymptotics | `optimal_truncation(a)`, `superasymptotic_remainder(a)` | — |
+| Stokes / large-order extraction (`S`, `β`, `A`, subleading `cⱼ`) | `stokes_action`, `stokes_exponent`, `stokes_constant`, `stokes_fit` | — |
 
 `quadgk` keyword arguments (`rtol`, `atol`, `order`) flow through to the
 Laplace integration step in every Borel-based method.
@@ -132,6 +133,36 @@ lateral sum traditionally written `S_θ⁻` in the resurgence literature.
 The discontinuity is computed as `(L_{+1} − L_{−1}) / (2i) = (S_θ⁻ − S_θ⁺) / (2i)`,
 which has magnitude equal to the textbook `(S_θ⁺ − S_θ⁻) / (2i)` but the
 opposite sign. Negate if you want the textbook convention.
+
+## Large-order / Stokes diagnostics
+
+A divergent perturbative series with leading large-order behaviour
+
+    a[k+1] ∼ A · Γ(k + β) / S^{k+β} · (1 + c₁/k + c₂/k² + …)
+
+encodes its instanton action `S`, exponent `β`, prefactor `A`, and
+subleading `cⱼ` directly in the coefficient ratios. `stokes_fit` reads them
+off via Richardson-accelerated tail extrapolation; `stokes_action`,
+`stokes_exponent`, and `stokes_constant` are the underlying single-quantity
+functions.
+
+```julia
+using Resurgence
+
+# a_k = (k+1)!  ⇒  exact (S, β, A) = (1, 2, 1).
+a = BigFloat[BigFloat(factorial(big(k + 1))) for k in 0:49]
+
+fit = stokes_fit(a)
+fit.S, fit.β, fit.A   # ≈ (1, 2, 1)
+
+# Recover the leading 1/k correction too:
+fit2 = stokes_fit(a; subleading = 2)
+fit2.c                # ≈ [c₁, c₂]
+```
+
+The fit is element-type generic (`Float64`, `BigFloat`, `Complex{T}`); for
+PT-symmetric problems where the action is complex (`S = ±i|S|`), a
+`Complex{T}` coefficient vector returns complex `S`, `β`, `A`.
 
 ## Tests
 

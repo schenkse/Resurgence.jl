@@ -19,6 +19,7 @@ include("conformal.jl")
 include("borel_pade.jl")
 include("meijerg.jl")
 include("truncation.jl")
+include("stokes.jl")
 include("api.jl")
 
 # functional API
@@ -33,6 +34,7 @@ export borel_pade_lateral, borel_pade_median, borel_pade_discontinuity
 export borel_leroy_pade_lateral, borel_leroy_pade_median, borel_leroy_pade_discontinuity
 export borel_meijerg
 export optimal_truncation, superasymptotic_remainder
+export stokes_action, stokes_exponent, stokes_constant, stokes_fit
 export chop!, sparsify!
 
 # unified API
