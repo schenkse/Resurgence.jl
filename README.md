@@ -43,17 +43,6 @@ borel_pade(a; n = 10, m = 10, x = 1)             # ≈ 0.59634736
 resum(BorelPade(10, 10), a)                       # same, via the unified API
 ```
 
-## Documentation
-
-Full docs, tutorials, methods guide, and API reference:
-**[schenkse.github.io/Resurgence.jl](https://schenkse.github.io/Resurgence.jl/dev/)**
-
-Tutorials cover the [Stieltjes / Euler series](https://schenkse.github.io/Resurgence.jl/dev/tutorials/stieltjes/),
-[lateral and median sums](https://schenkse.github.io/Resurgence.jl/dev/tutorials/lateral_sums/) for
-non-Borel-summable inputs, and
-[Stokes / large-order diagnostics](https://schenkse.github.io/Resurgence.jl/dev/tutorials/stokes_diagnostics/)
-for reading `S`, `β`, `A` off the coefficients.
-
 ## Tests
 
 ```julia

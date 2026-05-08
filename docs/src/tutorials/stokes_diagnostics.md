@@ -15,9 +15,9 @@ extrapolation.
 ## Driver: `aₖ = (k+1)!`
 
 This driver has exact `(S, β, A) = (1, 2, 1)` and is the canonical
-non-degenerate test case (see [`stokes_fit`](@ref) and
-[CLAUDE.md](https://github.com/schenkse/Resurgence.jl/blob/main/CLAUDE.md)
-for why the plain Stieltjes series `aₖ = (−1)ᵏ k!` is too degenerate).
+non-degenerate test case. The plain Stieltjes series `aₖ = (−1)ᵏ k!` is
+too degenerate for the underlying rational fit, which is why the shifted
+variant is preferred here.
 
 ```@example stokes
 using Resurgence
