@@ -11,17 +11,11 @@ the broader resurgence and large-order literature that motivates them.
   to physics. Chapter on Padé approximants is the gentlest entry point.
 - Costin, *Asymptotics and Borel Summability* [Costin2008](@cite).
   Modern, mathematically rigorous treatment of Borel summation, lateral
-  sums, and resurgence; the standard reference for the trans-series
-  framework.
+  sums, and the Stokes phenomenon.
 
 ## Resummation techniques
 
 - Shanks transformation: [Shanks1955](@cite).
-- Wynn ε-algorithm (planned, A1 on the [roadmap](roadmap.md)):
-  [Wynn1956](@cite).
-- Levin transforms: [Levin1973](@cite).
-- Weniger δ-transformation and review of nonlinear sequence transformations:
-  [Weniger1989](@cite).
 
 ## Borel summation and resurgence
 
@@ -45,16 +39,6 @@ the broader resurgence and large-order literature that motivates them.
   large-order behaviour in field theory, with explicit recipes for
   extracting `S`, `β`, `A` from coefficients — directly relevant to
   [`stokes_fit`](@ref).
-- Zinn-Justin & Jentschura, "Multi-instantons and exact results I"
-  [ZinnJustinJentschura2004](@cite). Modern resurgence-style treatment
-  with multi-instanton corrections.
-
-## Hyperasymptotics
-
-- Berry & Howls, "Hyperasymptotics for integrals with saddles"
-  [BerryHowls1990](@cite). The original hyperasymptotic terminant
-  expansion; the basis for the planned `hyperasymptotic` method (B3 on
-  the [roadmap](roadmap.md)).
 
 ## Bibliography
 

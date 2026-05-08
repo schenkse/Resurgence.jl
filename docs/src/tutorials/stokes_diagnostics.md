@@ -61,9 +61,9 @@ A = stokes_constant(a, S, β)
 (S, β, A)
 ```
 
-Useful when you want the action `S` alone to feed into a hyperasymptotic
-remainder estimate, or when you're sweeping a parameter and plotting how
-`S` varies.
+Useful when you want the action `S` alone — for example as the `sing`
+argument to [`conformal_borel_pade`](@ref) — or when you're sweeping a
+parameter and plotting how `S` varies.
 
 ## Complex `S` for PT-symmetric problems
 
@@ -103,8 +103,7 @@ For the underlying mathematical literature see the
 
 - **Subleading singularities**. If the Borel transform has more than one
   singularity at comparable distance, the leading-order extraction picks up
-  whichever wins; subleading `cⱼ` get contaminated. See the planned
-  multi-singularity conformal map (B4) on the [roadmap](../roadmap.md).
+  whichever wins; subleading `cⱼ` get contaminated.
 - **Sign-alternating with sub-leading complex pair**. The leading
   large-order behaviour is real, but the next contribution can be complex
   — a `Complex{T}` fit picks this up.

@@ -98,5 +98,5 @@ particular series you have in hand.
   leading non-perturbative contribution `e^{−S/g}` weighted by the Stokes
   constant. To extract `S` and `β` directly from the coefficients, see
   [Stokes / large-order diagnostics](stokes_diagnostics.md).
-- **Lateral sums individually**: useful if you're feeding the result into
-  trans-series machinery that expects a particular contour choice.
+- **Lateral sums individually**: useful if downstream code expects a
+  particular contour choice rather than the median.

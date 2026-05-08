@@ -94,8 +94,8 @@ The variants differ in how they handle the Padé step:
   transform has a single isolated singularity on the negative real axis.
 - [`borel_leroy_pade`](@ref) — Borel–Le Roy with parameter `b`: the
   factorial damping is `Γ(k + 1 + b)` instead of `k!`. The `b = -1/2`
-  default is a common physics choice; sweeping `b` (planned: order-dependent
-  mapping, B5 on the [roadmap](roadmap.md)) often improves convergence.
+  default is a common physics choice; sweeping `b` by hand often improves
+  convergence on a particular series.
 - [`conformal_borel_pade`](@ref) — first apply a conformal map that pushes
   the known Borel singularity to the boundary of the unit disk, then Padé.
   Best when you know `sing` (or have estimated it via
