@@ -25,7 +25,27 @@ using Pkg; Pkg.activate("."); Pkg.instantiate()
 using Resurgence
 ```
 
-The package targets Julia ≥ 1.10 (LTS).
+## Requirements
+
+Pkg resolves these automatically — you don't need to install them by hand
+— but here is the full compatibility floor declared in
+[`Project.toml`](https://github.com/schenkse/Resurgence.jl/blob/main/Project.toml):
+
+| Dependency               | Minimum version |
+| ------------------------ | --------------- |
+| Julia                    | 1.10 (LTS)      |
+| GenericLinearAlgebra.jl  | 0.4             |
+| HypergeometricFunctions.jl | 0.3           |
+| LinearAlgebra (stdlib)   | shipped with Julia ≥ 1 |
+| PolynomialRoots.jl       | 1               |
+| Polynomials.jl           | 4               |
+| QuadGK.jl                | 2               |
+| SpecialFunctions.jl      | 2               |
+
+Versions follow Julia's [compat
+semantics](https://pkgdocs.julialang.org/v1/compatibility/) — `"0.4"`
+means `≥ 0.4, < 0.5`; `"4"` means `≥ 4, < 5`. Test-only extras (`Aqua`,
+`Test`) are not part of the runtime requirements.
 
 ## A first end-to-end run
 
