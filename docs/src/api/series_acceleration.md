@@ -1,10 +1,8 @@
 # Sequence acceleration
 
-Standard sequence-acceleration tools for slowly-convergent (or
-slowly-divergent) sequences of partial sums.
+Standard sequence-acceleration tools for slowly-convergent (or slowly-divergent) sequences of partial sums.
 
-For when to reach for these vs. the Borel-side methods, see the
-[Methods guide](../methods_guide.md).
+For when to reach for these vs. the Borel-side methods, see the [Methods guide](../methods_guide.md).
 
 ## Public functions
 

@@ -1,12 +1,10 @@
 # Getting started
 
-This page walks through installing the package, computing one Borel sum,
-and pointing you at the next read.
+This page walks through installing the package, computing one Borel sum, and pointing you at the next read.
 
 ## Install
 
-Resurgence.jl is not yet registered in Julia's General registry, so install
-from GitHub:
+Resurgence.jl is not yet registered in Julia's General registry, so install from GitHub:
 
 ```julia
 using Pkg
@@ -27,9 +25,7 @@ using Resurgence
 
 ## Requirements
 
-Pkg resolves these automatically — you don't need to install them by hand
-— but here is the full compatibility floor declared in
-[`Project.toml`](https://github.com/schenkse/Resurgence.jl/blob/main/Project.toml):
+Pkg resolves these automatically — you don't need to install them by hand — but here is the full compatibility floor declared in [`Project.toml`](https://github.com/schenkse/Resurgence.jl/blob/main/Project.toml):
 
 | Dependency               | Minimum version |
 | ------------------------ | --------------- |
@@ -42,16 +38,14 @@ Pkg resolves these automatically — you don't need to install them by hand
 | QuadGK.jl                | 2               |
 | SpecialFunctions.jl      | 2               |
 
-Versions follow Julia's [compat
-semantics](https://pkgdocs.julialang.org/v1/compatibility/) — `"0.4"`
-means `≥ 0.4, < 0.5`; `"4"` means `≥ 4, < 5`. Test-only extras (`Aqua`,
-`Test`) are not part of the runtime requirements.
+Versions follow Julia's [compat semantics](https://pkgdocs.julialang.org/v1/compatibility/) — `"0.4"` means `≥ 0.4, < 0.5`; `"4"` means `≥ 4, < 5`.
+Test-only extras (`Aqua`, `Test`) are not part of the runtime requirements.
 
 ## A first end-to-end run
 
-The Stieltjes / Euler series `S(z) = Σ (−1)ᵏ k! zᵏ` is the canonical
-divergent-but-Borel-summable example. At `z = 1` it sums to
-`e · E₁(1) ≈ 0.5963473623`. Here's the full pipeline:
+The Stieltjes / Euler series `S(z) = Σ (−1)ᵏ k! zᵏ` is the canonical divergent-but-Borel-summable example.
+At `z = 1` it sums to `e · E₁(1) ≈ 0.5963473623`.
+Here's the full pipeline:
 
 ```@example getting_started
 using Resurgence
@@ -74,13 +68,12 @@ Nstar, partial_opt, εN = optimal_truncation(a)
 borel_pade(a; n = 10, m = 10, x = 1)
 ```
 
-The reference value is `0.5963473623…`, so Borel–Padé already gives ~8 digits
-from 25 input coefficients.
+The reference value is `0.5963473623…`, so Borel–Padé already gives ~8 digits from 25 input coefficients.
 
 ## Higher precision
 
-Every method propagates the input element type. Hand it `BigFloat` and the
-intermediate Padé fit and Laplace integral are `BigFloat` too.
+Every method propagates the input element type.
+Hand it `BigFloat` and the intermediate Padé fit and Laplace integral are `BigFloat` too.
 
 ```@example getting_started
 using Resurgence  # hide
@@ -90,10 +83,8 @@ borel_pade(ab; n = 20, m = 20, x = BigFloat(1))
 ```
 
 !!! note "QuadGK and BigFloat"
-    `quadgk` evaluates integration nodes in `Float64` by default, so even
-    with `BigFloat` input the quadrature error sits around `1e-14` unless
-    you ask for tighter tolerances. Pass `rtol = BigFloat("1e-30")` (and a
-    matching `atol`) explicitly to push further:
+    `quadgk` evaluates integration nodes in `Float64` by default, so even with `BigFloat` input the quadrature error sits around `1e-14` unless you ask for tighter tolerances.
+    Pass `rtol = BigFloat("1e-30")` (and a matching `atol`) explicitly to push further:
 
     ```julia
     borel_pade(ab; n = 20, m = 20, x = BigFloat(1),
@@ -115,19 +106,12 @@ borel_pade(a; n = 10, m = 10, x = 1)
 resum(BorelPade(10, 10), a)
 ```
 
-Use whichever fits your code. Per-method functions are canonical; the
-`resum(::AbstractResummation, …)` layer is a thin dispatch shim that lets
-callers swap methods by changing one struct.
+Use whichever fits your code.
+Per-method functions are canonical; the `resum(::AbstractResummation, …)` layer is a thin dispatch shim that lets callers swap methods by changing one struct.
 
 ## Next steps
 
-- Side-by-side comparison of every method on the Stieltjes series:
-  [Stieltjes tutorial](tutorials/stieltjes.md).
-- Series whose Borel transform has a singularity on the *positive* real axis
-  (so the standard Laplace integral is ill-defined):
-  [Lateral and median sums](tutorials/lateral_sums.md).
-- Reading the instanton action `S`, exponent `β`, and prefactor `A` off the
-  large-order behaviour of the coefficients themselves:
-  [Stokes / large-order diagnostics](tutorials/stokes_diagnostics.md).
-- Picking a method for your problem:
-  [Methods guide](methods_guide.md).
+- Side-by-side comparison of every method on the Stieltjes series: [Stieltjes tutorial](tutorials/stieltjes.md).
+- Series whose Borel transform has a singularity on the *positive* real axis (so the standard Laplace integral is ill-defined): [Lateral and median sums](tutorials/lateral_sums.md).
+- Reading the instanton action `S`, exponent `β`, and prefactor `A` off the large-order behaviour of the coefficients themselves: [Stokes / large-order diagnostics](tutorials/stokes_diagnostics.md).
+- Picking a method for your problem: [Methods guide](methods_guide.md).

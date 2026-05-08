@@ -7,19 +7,15 @@ Resummation techniques for divergent / asymptotic series, in pure Julia.
 [![Documentation (dev)](https://img.shields.io/badge/docs-dev-blue.svg)](https://schenkse.github.io/Resurgence.jl/dev/)
 [![Julia ≥ 1.10](https://img.shields.io/badge/Julia-≥1.10-9558B2?logo=julia)](https://julialang.org)
 
-The package targets resurgence and perturbative-physics workflows: take a
-formal power series with factorially-growing coefficients, recover a
-Borel-summable result. All methods are generic over the input element type —
-`Float64`, `BigFloat`, and complex variants are all first-class.
+The package targets resurgence and perturbative-physics workflows: take a formal power series with factorially-growing coefficients, recover a Borel-summable result.
+All methods are generic over the input element type — `Float64`, `BigFloat`, and complex variants are all first-class.
 
-> **Built with LLMs:** This project was developed with the help of AI coding
-> tools, primarily [Claude Code](https://claude.ai/code) by Anthropic. All
-> code has been reviewed and is maintained by the author.
+> **Built with LLMs:** This project was developed with the help of AI coding tools, primarily [Claude Code](https://claude.ai/code) by Anthropic.
+> All code has been reviewed and is maintained by the author.
 
 ## Install
 
-> Resurgence.jl is not yet registered in Julia's General registry, so
-> `Pkg.add("Resurgence")` will not work — install from GitHub for now.
+> Resurgence.jl is not yet registered in Julia's General registry, so `Pkg.add("Resurgence")` will not work — install from GitHub for now.
 
 ```julia
 using Pkg
@@ -29,9 +25,8 @@ using Resurgence
 
 ## Quick start
 
-The Stieltjes / Euler series `S(z) = Σ (-1)^k k! z^k` is divergent for every
-nonzero `z`, but Borel summable to `(1/z) e^{1/z} E₁(1/z)`. At `z = 1` the
-exact value is `e · E₁(1) ≈ 0.5963473623`.
+The Stieltjes / Euler series `S(z) = Σ (-1)^k k! z^k` is divergent for every nonzero `z`, but Borel summable to `(1/z) e^{1/z} E₁(1/z)`.
+At `z = 1` the exact value is `e · E₁(1) ≈ 0.5963473623`.
 
 ```julia
 using Resurgence

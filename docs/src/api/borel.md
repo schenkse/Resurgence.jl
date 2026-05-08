@@ -1,8 +1,6 @@
 # Borel transforms and conformal maps
 
-Low-level building blocks: the Borel and Borel–Le Roy transforms in `t`,
-their finite-difference ratios for diagnostics, and the conformal map used
-by [`conformal_borel_pade`](@ref).
+Low-level building blocks: the Borel and Borel–Le Roy transforms in `t`, their finite-difference ratios for diagnostics, and the conformal map used by [`conformal_borel_pade`](@ref).
 
 ## Borel and Borel–Le Roy transforms
 
