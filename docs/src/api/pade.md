@@ -1,6 +1,6 @@
 # Padé approximants
 
-Linear `[n/m]` Padé, continued-fraction (qd) Padé, and Hermite / quadratic Padé for algebraic branch points.
+Linear `[n/m]` Padé, continued-fraction (qd) Padé, and Hermite/quadratic Padé for algebraic branch points.
 The pole-handling utilities used by all Borel–Padé variants are also re-exposed here.
 
 For when to reach for which variant, see the [Methods guide](../methods_guide.md#padé-family).
@@ -23,7 +23,7 @@ Private = false
 Order   = [:function, :type]
 ```
 
-## Hermite / quadratic Padé
+## Hermite/quadratic Padé
 
 ```@autodocs
 Modules = [Resurgence]

@@ -43,7 +43,7 @@ Test-only extras (`Aqua`, `Test`) are not part of the runtime requirements.
 
 ## A first end-to-end run
 
-The Stieltjes / Euler series `S(z) = Σ (−1)ᵏ k! zᵏ` is the canonical divergent-but-Borel-summable example.
+The Stieltjes/Euler series `S(z) = Σ (−1)ᵏ k! zᵏ` is the canonical divergent-but-Borel-summable example.
 At `z = 1` it sums to `e · E₁(1) ≈ 0.5963473623`.
 Here's the full pipeline:
 
@@ -113,5 +113,5 @@ Per-method functions are canonical; the `resum(::AbstractResummation, …)` laye
 
 - Side-by-side comparison of every method on the Stieltjes series: [Stieltjes tutorial](tutorials/stieltjes.md).
 - Series whose Borel transform has a singularity on the *positive* real axis (so the standard Laplace integral is ill-defined): [Lateral and median sums](tutorials/lateral_sums.md).
-- Reading the instanton action `S`, exponent `β`, and prefactor `A` off the large-order behaviour of the coefficients themselves: [Stokes / large-order diagnostics](tutorials/stokes_diagnostics.md).
+- Reading the instanton action `S`, exponent `β`, and prefactor `A` off the large-order behaviour of the coefficients themselves: [Stokes/large-order diagnostics](tutorials/stokes_diagnostics.md).
 - Picking a method for your problem: [Methods guide](methods_guide.md).

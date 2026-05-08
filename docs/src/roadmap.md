@@ -1,6 +1,6 @@
 # Roadmap
 
-Resurgence.jl ships a working classical-resummation toolkit: Shanks and Richardson acceleration, Padé and Borel / Borel–Le Roy / (single-singularity) conformal Borel–Padé, Meijer-G via the Slater-collapse onto `pFq`, optimal truncation, and lateral / median / discontinuity Borel–Padé with Stokes / large-order diagnostics on top.
+Resurgence.jl ships a working classical-resummation toolkit: Shanks and Richardson acceleration, Padé and Borel/Borel–Le Roy/(single-singularity) conformal Borel–Padé, Meijer-G via the Slater-collapse onto `pFq`, optimal truncation, and lateral/median/discontinuity Borel–Padé with Stokes/large-order diagnostics on top.
 
 The remaining gaps are mostly on the resurgence-specific side — first-class trans-series, hyperasymptotic remainders, multi-singularity conformal maps, order-dependent mapping — and a handful of standard sequence-acceleration tools (Levin, Weniger, Wynn ε, Brezinski θ/ρ, Sidi S) that users expect to find.
 This page is a working list of those items, sized and sketched enough to start a focused implementation task.
@@ -10,18 +10,18 @@ This page is a working list of those items, sized and sketched enough to start a
 | ID  | Technique                                | Section            | Size | Status  |
 | --- | ---------------------------------------- | ------------------ | ---- | ------- |
 | A1  | Wynn ε-algorithm                         | Acceleration       | S    | Planned |
-| A2  | Levin u / t / v transforms               | Acceleration       | M    | Planned |
+| A2  | Levin u/t/v transforms               | Acceleration       | M    | Planned |
 | A3  | Weniger δ-transformation                 | Acceleration       | S    | Planned |
 | A4  | Brezinski θ-algorithm                    | Acceleration       | S    | Planned |
 | A5  | Brezinski ρ-algorithm                    | Acceleration       | S    | Planned |
 | A6  | Aitken–Steffensen for fixed points       | Acceleration       | S    | Planned |
 | A7  | Sidi S-transformation (W-algorithm)      | Acceleration       | S    | Planned |
-| A8  | Cesàro / Abel summation                  | Acceleration       | S    | Planned |
-| B1  | Trans-series type and arithmetic         | Borel / resurgence | L    | Planned |
-| B2  | Per-sector trans-series resummation      | Borel / resurgence | S    | Planned |
-| B3  | Hyperasymptotic remainders               | Borel / resurgence | M    | Planned |
-| B4  | Multi-singularity conformal map          | Borel / resurgence | M    | Planned |
-| B5  | Order-dependent mapping (ODM)            | Borel / resurgence | M    | Planned |
+| A8  | Cesàro/Abel summation                  | Acceleration       | S    | Planned |
+| B1  | Trans-series type and arithmetic         | Borel/resurgence | L    | Planned |
+| B2  | Per-sector trans-series resummation      | Borel/resurgence | S    | Planned |
+| B3  | Hyperasymptotic remainders               | Borel/resurgence | M    | Planned |
+| B4  | Multi-singularity conformal map          | Borel/resurgence | M    | Planned |
+| B5  | Order-dependent mapping (ODM)            | Borel/resurgence | M    | Planned |
 
 Sizes: **S** ≤ ~50 LOC, **M** ≤ ~300 LOC, **L** = needs design.
 
@@ -44,9 +44,9 @@ Operates on the tableau directly; even-column entries are the meaningful approxi
 
 ### A2 — Levin transforms (u, t, v)  · *Medium*
 
-**Goal.** `L_k^{(n)} = Σⱼ (−1)ʲ C(k,j) (n+j+β)^{k−1} Aₙ₊ⱼ / ωₙ₊ⱼ / Σⱼ (−1)ʲ C(k,j) (n+j+β)^{k−1} / ωₙ₊ⱼ` with three remainder estimators ωₙ: `aₙ` (t), `(n+β) aₙ` (u), `aₙ aₙ₊₁/(aₙ₊₁−aₙ)` (v).
+**Goal.** `L_k^{(n)} = Σⱼ (−1)ʲ C(k,j) (n+j+β)^{k−1} Aₙ₊ⱼ/ωₙ₊ⱼ/Σⱼ (−1)ʲ C(k,j) (n+j+β)^{k−1}/ωₙ₊ⱼ` with three remainder estimators ωₙ: `aₙ` (t), `(n+β) aₙ` (u), `aₙ aₙ₊₁/(aₙ₊₁−aₙ)` (v).
 
-**Why now.** Frequently outperform Shanks on monotone divergent / asymptotic series — exactly the regime resurgence cares about.
+**Why now.** Frequently outperform Shanks on monotone divergent/asymptotic series — exactly the regime resurgence cares about.
 Not currently available.
 
 **Sketch.** New `src/levin.jl` exposing `levin(a, n; variant=:u, β=1)`.
@@ -91,7 +91,7 @@ Recursion mixes 4 tableau entries.
 
 ### A6 — Aitken–Steffensen for fixed points  · *Small*
 
-**Goal.** `x_{k+1} = g(x_k) − (g(x_k)−x_k)² / (g(g(x_k)) − 2g(x_k) + x_k)`.
+**Goal.** `x_{k+1} = g(x_k) − (g(x_k)−x_k)²/(g(g(x_k)) − 2g(x_k) + x_k)`.
 
 **Why now.** Useful when a series can be written as a fixed-point iteration; complements Shanks on the sum side.
 
@@ -111,7 +111,7 @@ Recursion mixes 4 tableau entries.
 **Reuses.** A2 infrastructure.
 **API tag.** `SidiS(n; …)`.
 
-### A8 — Cesàro / Abel summation  · *Small*
+### A8 — Cesàro/Abel summation  · *Small*
 
 **Goal.** `cesaro(a, n)` and `abel(a; x)` (radial limit `lim_{x→1⁻} Σ aₖ xᵏ`).
 
@@ -122,7 +122,7 @@ Recursion mixes 4 tableau entries.
 **Reuses.** Existing partial-sum machinery.
 **API tag.** `Cesaro`, `Abel(x)`.
 
-## B. Borel side / resurgence-specific (core)
+## B. Borel side/resurgence-specific (core)
 
 ### B1 — Trans-series type and arithmetic  · *Large*
 
@@ -152,7 +152,7 @@ Loop over sectors, dispatch through the existing `resum(::AbstractResummation, .
 **Reuses.** [src/api.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/api.jl) entire dispatch surface.
 **API tag.** Standalone function; no new struct.
 
-### B3 — Hyperasymptotic remainders (Berry–Howls / Costin)  · *Medium*
+### B3 — Hyperasymptotic remainders (Berry–Howls/Costin)  · *Medium*
 
 **Goal.** Extend [src/truncation.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/truncation.jl) `superasymptotic_remainder` by adding terminant-function corrections that incorporate the leading instanton contribution: error scales like `e^{−2|S|/g}` instead of `e^{−|S|/g}`.
 Iteratively, hyperasymptotic level `k` gives error `e^{−(k+1)|S|/g}`.
@@ -160,7 +160,7 @@ Iteratively, hyperasymptotic level `k` gives error `e^{−(k+1)|S|/g}`.
 **Why now.** The natural next step beyond superasymptotic, and the *quantitative* face of resurgence: precision improves geometrically by re-summing the tail of the original series as a new asymptotic series weighted by terminants.
 
 **Sketch.** New `hyperasymptotic(a, x; level=1, action=nothing)` in [src/truncation.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/truncation.jl).
-Terminant `T_p(σ)` via the incomplete-gamma representation `T_p(σ) = e^{iπp} Γ(p) Γ(1−p, σ) / (2πi)`.
+Terminant `T_p(σ)` via the incomplete-gamma representation `T_p(σ) = e^{iπp} Γ(p) Γ(1−p, σ)/(2πi)`.
 If `action` not provided, derive it from the existing Stokes-fit utilities.
 
 **Reuses.** [src/truncation.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/truncation.jl), `SpecialFunctions.gamma_inc`, existing Stokes diagnostics for `S` extraction.
@@ -176,14 +176,14 @@ The current single-pole assumption silently mis-treats these.
 
 **Sketch.**
 
-- `conformal_map_pair(t; a)` — `w(t) = t / √(1 + (t/a)²)` style map for `±i·a`.
+- `conformal_map_pair(t; a)` — `w(t) = t/√(1 + (t/a)²)` style map for `±i·a`.
 - `conformal_map_set(t, sings)` — generic; harder, defer to second pass.
 - Add `conformal_borel_pade_pair(a; n, m, x, sing, kwargs...)`.
 
 **Reuses.** [src/conformal.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/conformal.jl) `conformal_reseries` (the re-expansion bookkeeping is reusable; only the map changes).
 **API tag.** `ConformalBorelPadePair(...)`.
 
-### B5 — Order-dependent mapping (ODM) / variational Bender–Boettcher  · *Medium*
+### B5 — Order-dependent mapping (ODM)/variational Bender–Boettcher  · *Medium*
 
 **Goal.** Treat the conformal-map exponent (or Le Roy `b`) as a variational parameter and choose it order-by-order to minimise sensitivity (`d/db = 0`).
 

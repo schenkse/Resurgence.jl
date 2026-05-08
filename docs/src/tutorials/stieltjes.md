@@ -1,6 +1,6 @@
-# Stieltjes / Euler series
+# Stieltjes/Euler series
 
-The Stieltjes / Euler series
+The Stieltjes/Euler series
 
 ```math
 S(z) \;=\; \sum_{k \ge 0} (-1)^k \, k! \, z^k

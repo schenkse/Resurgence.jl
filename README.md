@@ -1,6 +1,6 @@
 # Resurgence.jl
 
-Resummation techniques for divergent / asymptotic series, in pure Julia.
+Resummation techniques for divergent/asymptotic series, in pure Julia.
 
 [![Test and Release](https://github.com/schenkse/Resurgence.jl/actions/workflows/test-release.yml/badge.svg)](https://github.com/schenkse/Resurgence.jl/actions/workflows/test-release.yml)
 [![Documentation (stable)](https://img.shields.io/badge/docs-stable-blue.svg)](https://schenkse.github.io/Resurgence.jl/stable/)
@@ -25,7 +25,7 @@ using Resurgence
 
 ## Quick start
 
-The Stieltjes / Euler series `S(z) = Σ (-1)^k k! z^k` is divergent for every nonzero `z`, but Borel summable to `(1/z) e^{1/z} E₁(1/z)`.
+The Stieltjes/Euler series `S(z) = Σ (-1)^k k! z^k` is divergent for every nonzero `z`, but Borel summable to `(1/z) e^{1/z} E₁(1/z)`.
 At `z = 1` the exact value is `e · E₁(1) ≈ 0.5963473623`.
 
 ```julia

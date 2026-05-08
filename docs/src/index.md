@@ -10,9 +10,9 @@ Every method is generic over the input element type — `Float64`, `BigFloat`, `
 | Family                  | Methods |
 | ----------------------- | ------- |
 | Sequence acceleration   | Shanks (with iterated depth), Richardson |
-| Padé approximants       | Linear, continued-fraction (qd), Hermite / quadratic |
+| Padé approximants       | Linear, continued-fraction (qd), Hermite/quadratic |
 | Borel side              | Borel, Borel–Le Roy, Borel–Padé, conformal Borel–Padé |
-| Lateral / median sums   | Lateral, median, and discontinuity for Borel–Padé and Borel–Le Roy–Padé |
+| Lateral/median sums   | Lateral, median, and discontinuity for Borel–Padé and Borel–Le Roy–Padé |
 | Closed-form             | Meijer-G via Slater collapse onto `pFq` |
 | Truncation              | Optimal truncation, superasymptotic remainder |
 | Diagnostics             | Stokes action, exponent, constant, joint fit |
@@ -62,7 +62,7 @@ Per-method functions are canonical; the `resum(::AbstractResummation, …)` laye
 - Have a divergent series and want to know which method fits?
   Jump to the [Methods guide](methods_guide.md).
 - Want worked physics-style examples?
-  See the [Stieltjes tutorial](tutorials/stieltjes.md), [lateral and median sums](tutorials/lateral_sums.md), or [Stokes / large-order diagnostics](tutorials/stokes_diagnostics.md).
+  See the [Stieltjes tutorial](tutorials/stieltjes.md), [lateral and median sums](tutorials/lateral_sums.md), or [Stokes/large-order diagnostics](tutorials/stokes_diagnostics.md).
 - Looking up a specific function?
   The API pages (sidebar) auto-generate from source docstrings.
 

@@ -8,14 +8,14 @@ This page is a decision tree.
 
 | Your series looks like…                                               | Try first                                          | Then maybe                                                                 |
 | --------------------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------- |
-| Convergent but slow                                                   | [`shanks`](@ref) / [`richardson`](@ref)            | [`pade`](@ref) for analytic-continuation needs                             |
+| Convergent but slow                                                   | [`shanks`](@ref)/[`richardson`](@ref)            | [`pade`](@ref) for analytic-continuation needs                             |
 | Factorially divergent, alternating sign (Borel-summable)              | [`borel_pade`](@ref)                               | [`conformal_borel_pade`](@ref) if you know where the singularity is        |
 | Factorially divergent, all-positive (non-Borel-summable)              | [`borel_pade_median`](@ref)                        | [`borel_pade_lateral`](@ref) + [`borel_pade_discontinuity`](@ref)          |
 | Borel transform has known branch point at `t = -sing`                 | [`conformal_borel_pade`](@ref)                     | [`borel_leroy_pade`](@ref) with tuned `b`                                  |
 | Borel transform has algebraic branch point in `x`                     | [`hermite_pade`](@ref)                             | [`hermite_pade_value`](@ref) with branch selector                          |
-| You suspect closed form / hypergeometric                              | [`borel_meijerg`](@ref)                            | The Stieltjes tutorial covers degenerate cases                             |
+| You suspect closed form/hypergeometric                              | [`borel_meijerg`](@ref)                            | The Stieltjes tutorial covers degenerate cases                             |
 | Just need a quick error bound on a partial sum                        | [`optimal_truncation`](@ref)                       | [`superasymptotic_remainder`](@ref) for the tail estimate alone            |
-| Want `S`, `β`, `A` from large-order behaviour                         | [`stokes_fit`](@ref)                               | [`stokes_action`](@ref) / [`stokes_exponent`](@ref) one at a time          |
+| Want `S`, `β`, `A` from large-order behaviour                         | [`stokes_fit`](@ref)                               | [`stokes_action`](@ref)/[`stokes_exponent`](@ref) one at a time          |
 
 ## Decision tree
 
@@ -34,13 +34,13 @@ This page is a decision tree.
                                               ▼                      ▼
                                        ┌──────────────┐       ┌────────────────────┐
                                        │ borel_pade   │       │ borel_pade_median  │
-                                       │ borel_leroy  │       │ + _lateral / _disc │
+                                       │ borel_leroy  │       │ + _lateral/_disc │
                                        │ conformal_   │       │ for ambiguity      │
                                        │   borel_pade │       └────────────────────┘
                                        └──────────────┘
 ```
 
-If you don't know whether the series is alternating, look at [`stokes_fit`](@ref): real `S > 0` means the leading Borel singularity is on the negative real axis (alternating-sign / Borel-summable case); real `S < 0` puts it on the positive real axis (non-Borel-summable — reach for the lateral / median methods).
+If you don't know whether the series is alternating, look at [`stokes_fit`](@ref): real `S > 0` means the leading Borel singularity is on the negative real axis (alternating-sign/Borel-summable case); real `S < 0` puts it on the positive real axis (non-Borel-summable — reach for the lateral/median methods).
 
 ## Sequence acceleration: Shanks vs. Richardson
 
@@ -62,7 +62,7 @@ Three flavours, increasing in specialty:
   The default Padé you want.
 - [`pade_cf`](@ref) — Padé via the qd algorithm, returning a continued fraction.
   Cheaper to evaluate at many `x` values once built, but only works for `n == m` or `n + 1 == m`.
-- [`hermite_pade`](@ref) — quadratic / Hermite Padé.
+- [`hermite_pade`](@ref) — quadratic/Hermite Padé.
   Use this when the function you're approximating has a *branch point* in `x` rather than a pole — algebraic branch points need quadratic, not linear, denominators.
 
 ## Borel-side methods
@@ -84,11 +84,11 @@ The variants differ in how they handle the Padé step:
   Subsumes `borel_pade` for benign cases and beats it when the singularity is known.
 
 For a series whose Borel transform has a singularity on the *positive* real axis (`S < 0`), the standard Laplace integral is ill-defined.
-Use the lateral / median variants:
+Use the lateral/median variants:
 
 - [`borel_pade_lateral`](@ref) `(side = ±1)` — contour-deformed integral.
-- [`borel_pade_median`](@ref) — `(L⁺ + L⁻) / 2`, the ambiguity-free median.
-- [`borel_pade_discontinuity`](@ref) — `(L⁺ − L⁻) / (2i)`, the imaginary Stokes jump.
+- [`borel_pade_median`](@ref) — `(L⁺ + L⁻)/2`, the ambiguity-free median.
+- [`borel_pade_discontinuity`](@ref) — `(L⁺ − L⁻)/(2i)`, the imaginary Stokes jump.
 
 The Le Roy variants (`borel_leroy_pade_lateral`, `_median`, `_discontinuity`) parallel these one-for-one.
 
@@ -97,7 +97,7 @@ The Le Roy variants (`borel_leroy_pade_lateral`, `_median`, `_discontinuity`) pa
 [`borel_meijerg`](@ref) tries to identify the Borel transform with a hypergeometric `pFq`, which when Laplace-integrated gives a Meijer-G function.
 The implementation collapses the resulting G onto a single `HypergeometricFunctions.pFq` call via the Slater identity (the doubled `b_h = 1` from Borel–Laplace cancels two of the numerator parameters), so no Meijer-G is ever evaluated directly.
 
-This wins when it works — closed-form-quality answers from a finite series — but the rational fit `P(k) / Q(k)` it does internally is rank-deficient on degenerate drivers (the unshifted Stieltjes series is one such trap).
+This wins when it works — closed-form-quality answers from a finite series — but the rational fit `P(k)/Q(k)` it does internally is rank-deficient on degenerate drivers (the unshifted Stieltjes series is one such trap).
 See the [Stieltjes tutorial](tutorials/stieltjes.md) for details.
 
 ## Truncation diagnostics
@@ -109,16 +109,16 @@ This is "free" — it doesn't compute anything beyond the partial sums you alrea
 
 ## Stokes diagnostics
 
-[`stokes_fit`](@ref) reads `S`, `β`, `A` (and optionally subleading `cⱼ`) off the coefficient ratios `aₖ₊₁ / aₖ` via Richardson-accelerated tail extrapolation.
+[`stokes_fit`](@ref) reads `S`, `β`, `A` (and optionally subleading `cⱼ`) off the coefficient ratios `aₖ₊₁/aₖ` via Richardson-accelerated tail extrapolation.
 Single-quantity helpers exist: [`stokes_action`](@ref), [`stokes_exponent`](@ref), [`stokes_constant`](@ref).
 
 Useful when:
 
 - You want to know where the leading Borel singularity is (`sing = S`) before reaching for [`conformal_borel_pade`](@ref).
 - You're studying the resurgent structure of a problem and want to see whether `S` matches a known instanton action.
-- You want to compare the discontinuity from [`borel_pade_discontinuity`](@ref) against the analytic prediction `2π · A / Γ(β) · e^{-S/x}`.
+- You want to compare the discontinuity from [`borel_pade_discontinuity`](@ref) against the analytic prediction `2π · A/Γ(β) · e^{-S/x}`.
 
-See [Stokes / large-order diagnostics](tutorials/stokes_diagnostics.md) for a full worked example.
+See [Stokes/large-order diagnostics](tutorials/stokes_diagnostics.md) for a full worked example.
 
 ## Unified API
 

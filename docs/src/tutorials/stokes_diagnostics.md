@@ -1,4 +1,4 @@
-# Stokes / large-order diagnostics
+# Stokes/large-order diagnostics
 
 A divergent perturbative series with leading large-order behaviour
 
@@ -71,12 +71,12 @@ No silent promotion.
 
 ## How the fit works (sketch)
 
-The recipe (Bender & Wu 1969 / 1973 [BenderWu1969](@cite), [BenderWu1973](@cite); Suslov 2005 [Suslov2005](@cite)):
+The recipe (Bender & Wu 1969/1973 [BenderWu1969](@cite), [BenderWu1973](@cite); Suslov 2005 [Suslov2005](@cite)):
 
-1. From `aₖ`, form the ratio sequence `rₖ = aₖ₊₁ / aₖ`.
-   To leading order `rₖ ≈ k / S`, so `1 / S` is the slope of the line `rₖ vs. k` at large `k`.
-2. The exponent `β` shows up as the next-to-leading correction `rₖ ≈ k / S + (β − 1) / S + O(1/k)` — extract it from `S · rₖ − k`.
-3. The prefactor `A` is read off from the asymptotic relation `aₖ ≈ A · Γ(k + β) / S^{k+β}` once `S` and `β` are known.
+1. From `aₖ`, form the ratio sequence `rₖ = aₖ₊₁/aₖ`.
+   To leading order `rₖ ≈ k/S`, so `1/S` is the slope of the line `rₖ vs. k` at large `k`.
+2. The exponent `β` shows up as the next-to-leading correction `rₖ ≈ k/S + (β − 1)/S + O(1/k)` — extract it from `S · rₖ − k`.
+3. The prefactor `A` is read off from the asymptotic relation `aₖ ≈ A · Γ(k + β)/S^{k+β}` once `S` and `β` are known.
 4. Richardson extrapolation (with iterated depth) accelerates the convergence of each tail-extracted quantity, which is critical when only 30–60 coefficients are available.
 
 For the underlying mathematical literature see the [References](../references.md) page.
@@ -88,5 +88,5 @@ For the underlying mathematical literature see the [References](../references.md
 - **Sign-alternating with sub-leading complex pair**.
   The leading large-order behaviour is real, but the next contribution can be complex — a `Complex{T}` fit picks this up.
 - **Insufficient precision**.
-  `Float64` runs out of digits for `Γ(k + β) / S^{k+β}` quickly.
+  `Float64` runs out of digits for `Γ(k + β)/S^{k+β}` quickly.
   Use `BigFloat` whenever you suspect digit starvation.

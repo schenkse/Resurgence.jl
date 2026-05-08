@@ -14,7 +14,7 @@ Their average is the ambiguity-free **median** sum and their difference exposes 
 ## Driver: `aₖ = k!`
 
 The series `S(z) = Σ k! zᵏ` has Borel transform `1/(1−t)`, with a pole at `t = 1`.
-At `z = 1` the median sum recovers the Cauchy principal value `Ei(1) / e ≈ 0.6972`, and the Stokes discontinuity has magnitude `π / e ≈ 1.1557`.
+At `z = 1` the median sum recovers the Cauchy principal value `Ei(1)/e ≈ 0.6972`, and the Stokes discontinuity has magnitude `π/e ≈ 1.1557`.
 
 ```@example lateral
 using Resurgence
@@ -40,7 +40,7 @@ v_disc = borel_pade_discontinuity(a; n = 10, m = 10, x = 1)
 @printf("discontinuity: %.6f + %.6fim\n", real(v_disc), imag(v_disc))
 ```
 
-Magnitude `≈ π / e ≈ 1.1557`, real-valued.
+Magnitude `≈ π/e ≈ 1.1557`, real-valued.
 This is the imaginary jump that encodes the leading instanton contribution in resurgence-style problems.
 
 ## The two lateral sums
@@ -63,12 +63,12 @@ For real input these are exact complex conjugates of each other.
     (L_{+1} - L_{-1}) \big/ (2i) \;=\; (S_\theta^- - S_\theta^+) \big/ (2i),
     ```
 
-    which has magnitude equal to the textbook `(S_θ⁺ − S_θ⁻) / (2i)` but the *opposite sign*.
+    which has magnitude equal to the textbook `(S_θ⁺ − S_θ⁻)/(2i)` but the *opposite sign*.
     Negate the return value if you want the textbook convention.
 
 ## Le Roy variants
 
-The same lateral / median / discontinuity trio exists for Borel–Le Roy:
+The same lateral/median/discontinuity trio exists for Borel–Le Roy:
 
 ```julia
 borel_leroy_pade_lateral(a; n, m, b, x, side, ...)
@@ -83,5 +83,5 @@ Useful when the Le Roy parameter `b` improves Padé conditioning on the particul
 - **Median sum**: the right "value" to report when the standard Borel sum doesn't exist.
   Real-valued for real input series with complex-conjugate singularity pairs or with isolated positive-real-axis singularities.
 - **Discontinuity**: the numerical face of resurgence — proportional to the leading non-perturbative contribution `e^{−S/g}` weighted by the Stokes constant.
-  To extract `S` and `β` directly from the coefficients, see [Stokes / large-order diagnostics](stokes_diagnostics.md).
+  To extract `S` and `β` directly from the coefficients, see [Stokes/large-order diagnostics](stokes_diagnostics.md).
 - **Lateral sums individually**: useful if downstream code expects a particular contour choice rather than the median.
