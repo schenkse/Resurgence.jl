@@ -94,7 +94,7 @@ The Le Roy variants (`borel_leroy_pade_lateral`, `_median`, `_discontinuity`) pa
 
 ## Closed-form: Meijer-G
 
-[`borel_meijerg`](@ref) tries to identify the Borel transform with a hypergeometric `pFq`, which when Laplace-integrated gives a Meijer-G function.
+[`borel_meijerg`](@ref) tries to identify the Borel transform with a hypergeometric `pFq`, which when Laplace-integrated gives a Meijer-G function — the construction is due to Mera, Pedersen & Nikolić [Mera2018](@cite).
 The implementation collapses the resulting G onto a single `HypergeometricFunctions.pFq` call via the Slater identity (the doubled `b_h = 1` from Borel–Laplace cancels two of the numerator parameters), so no Meijer-G is ever evaluated directly.
 
 This wins when it works — closed-form-quality answers from a finite series — but the rational fit `P(k)/Q(k)` it does internally is rank-deficient on degenerate drivers (the unshifted Stieltjes series is one such trap).

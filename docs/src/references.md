@@ -13,6 +13,8 @@ Canonical references for the techniques implemented in Resurgence.jl, plus the b
 ## Resummation techniques
 
 - Shanks transformation: [Shanks1955](@cite).
+- Meijer-G resummation: Mera, Pedersen & Nikolić, "Fast Summation of Divergent Series and Resurgent Transseries in Quantum Field Theories from Meijer-G Approximants" [Mera2018](@cite).
+  The standard reference for the Borel–hypergeometric–Meijer-G pipeline implemented by [`borel_meijerg`](@ref).
 
 ## Borel summation and resurgence
 
