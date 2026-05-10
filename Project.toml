@@ -3,6 +3,9 @@ uuid = "0d9a2b1e-9c4f-4f2a-9b3a-2f5b7e8f9a01"
 version = "0.1.3"
 authors = ["Sebastian Schenk <schenk.seb@gmail.com>"]
 
+[workspace]
+projects = ["docs"]
+
 [deps]
 GenericLinearAlgebra = "14197337-ba66-59df-a3e3-ca00e7dcff7a"
 HypergeometricFunctions = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
