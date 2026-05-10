@@ -12,7 +12,7 @@ makedocs(;
     format   = Documenter.HTML(;
         prettyurls   = get(ENV, "CI", "false") == "true",
         canonical    = "https://schenkse.github.io/Resurgence.jl",
-        edit_link    = "main",
+        edit_link    = "dev",
         assets       = String[],
         mathengine   = Documenter.KaTeX(),
         sidebar_sitename = false,
@@ -45,6 +45,6 @@ makedocs(;
 
 deploydocs(;
     repo      = "github.com/schenkse/Resurgence.jl.git",
-    devbranch = "main",
+    devbranch = "dev",
     push_preview = true,
 )
