@@ -1,7 +1,7 @@
 module Resurgence
 
 using LinearAlgebra
-using GenericLinearAlgebra  # extends svd/pinv to BigFloat (rank-deficient pade fallback)
+using GenericLinearAlgebra
 using HypergeometricFunctions
 using Polynomials
 using PolynomialRoots
