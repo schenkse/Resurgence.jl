@@ -69,6 +69,13 @@ using Resurgence
         @test resum(WynnEps(5; depth = 3), a) ≈ wynn_eps(a, 5; depth = 3)
     end
 
+    @testset "BrezinskiTheta dispatches with depth" begin
+        N = 30
+        a = Float64[4 * (-1.0)^k / (2k + 1) for k in 0:N-1]
+        @test resum(BrezinskiTheta(5; depth = 3), a) ≈
+              theta_brezinski(a, 5; depth = 3)
+    end
+
     @testset "Cesaro dispatches with depth" begin
         N = 100
         a = Float64[4 * (-1.0)^k / (2k + 1) for k in 0:N-1]

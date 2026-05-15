@@ -25,6 +25,7 @@ include("api.jl")
 
 # functional API
 export shanks, richardson, wynn_eps, cesaro, abel
+export theta_brezinski
 export levin, weniger
 export pade, pade_value
 export pade_cf, pade_cf_value
@@ -43,7 +44,7 @@ export chop!, sparsify!
 export AbstractResummation, Shanks, Richardson, WynnEps, Pade, PadeCF, HermitePade,
     BorelPade, BorelPadeLateral, BorelPadeMedian,
     BorelLeRoyPade, ConformalBorelPade, MeijerG,
-    Cesaro, Abel, Levin, Weniger
+    Cesaro, Abel, Levin, Weniger, BrezinskiTheta
 export resum
 
 end # module

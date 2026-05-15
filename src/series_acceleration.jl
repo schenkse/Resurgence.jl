@@ -189,6 +189,73 @@ function _wynn_eps_iter(S::AbstractVector{T}, depth::Integer) where {T<:Number}
 end
 
 """
+    theta_brezinski(a, n; depth = 1)
+
+Apply Brezinski's θ-algorithm to the partial sums of `a` and return the entry
+at even column `2·depth` of the θ-tableau.
+
+`a[k]` is the k-th term of the series; with partial sums `Aⱼ = sum(a[1:j])`,
+the recursion is
+
+    θ_{-1}^{(n)} = 0,    θ_0^{(n)} = Aₙ,
+    θ_{2k+1}^{(n)} = θ_{2k-1}^{(n+1)} + 1 / (θ_{2k}^{(n+1)} − θ_{2k}^{(n)}),
+    θ_{2k+2}^{(n)} = θ_{2k}^{(n+1)}
+                     + (θ_{2k}^{(n+2)} − θ_{2k}^{(n+1)})
+                       · (θ_{2k+1}^{(n+2)} − θ_{2k+1}^{(n+1)})
+                     / (θ_{2k+1}^{(n+2)} − 2 θ_{2k+1}^{(n+1)} + θ_{2k+1}^{(n)}).
+
+Even columns carry the accelerated estimates; odd columns are auxiliary. The
+θ-algorithm complements [`wynn_eps`](@ref) on sequences where the ε-algorithm
+breaks down (denominator vanishes), at the cost of three new data points per
+acceleration level — hence the requirement `length(a) ≥ n + 3·depth`.
+
+When a denominator vanishes the implementation returns the previous-column
+entry at that position instead of `NaN`/`Inf`.
+"""
+function theta_brezinski(a::AbstractVector{T}, n::Integer;
+                         depth::Integer = 1) where {T<:Number}
+    depth ≥ 1 || throw(ArgumentError("depth must be ≥ 1"))
+    n ≥ 1 || throw(ArgumentError("n must be ≥ 1"))
+    N = n + 3 * depth
+    N ≤ length(a) || throw(ArgumentError(
+        "need length(a) ≥ n+3·depth = $N, got $(length(a))"))
+    S = Vector{T}(undef, N)
+    acc = zero(T)
+    @inbounds for k in 1:N
+        acc += a[k]
+        S[k] = acc
+    end
+    return _theta_brezinski_iter(S, depth)
+end
+
+function _theta_brezinski_iter(S::AbstractVector{T}, depth::Integer) where {T<:Number}
+    col_minus1 = zeros(T, length(S))
+    col_prev = collect(S)
+    for _ in 1:depth
+        L = length(col_prev) - 1
+        L ≥ 3 || throw(ArgumentError("not enough partial sums to iterate θ-algorithm"))
+        col_odd = Vector{T}(undef, L)
+        @inbounds for j in 1:L
+            d = col_prev[j+1] - col_prev[j]
+            iszero(d) && return col_prev[j+1]
+            col_odd[j] = col_minus1[j+1] + inv(d)
+        end
+        L2 = L - 2
+        col_even = Vector{T}(undef, L2)
+        @inbounds for j in 1:L2
+            Δprev = col_prev[j+2] - col_prev[j+1]   # Δθ_{2k}^{(n+1)}
+            Δodd  = col_odd[j+2] - col_odd[j+1]      # Δθ_{2k+1}^{(n+1)}
+            Δ2odd = col_odd[j+2] - 2 * col_odd[j+1] + col_odd[j]
+            iszero(Δ2odd) && return col_prev[j+1]
+            col_even[j] = col_prev[j+1] + Δprev * Δodd / Δ2odd
+        end
+        col_minus1 = col_odd
+        col_prev = col_even
+    end
+    return last(col_prev)
+end
+
+"""
     cesaro(a, n; depth = 1)
 
 Cesàro mean of the partial sums of `a` at index `n`. With `depth = d`, the
