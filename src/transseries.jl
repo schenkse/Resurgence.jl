@@ -178,3 +178,58 @@ function transseries_exp(ts::TransSeries{T}; order::Integer = 4) where {T<:Numbe
     end
     return result
 end
+
+# ---------- per-sector resummation ----------
+
+# Internal: rebind the evaluation point `x` of a resummation tag to `g`.
+# Sequence accelerators have no `x` (they evaluate partial sums of the
+# truncated coefficient vector directly) and pass through unchanged.
+
+_with_x(m::Shanks, _) = m
+_with_x(m::Richardson, _) = m
+_with_x(m::WynnEps, _) = m
+_with_x(m::BrezinskiTheta, _) = m
+_with_x(m::BrezinskiRho, _) = m
+_with_x(m::Cesaro, _) = m
+_with_x(m::Levin, _) = m
+_with_x(m::Weniger, _) = m
+_with_x(m::SidiS, _) = m
+
+_with_x(m::Abel, g) = Abel(; x = g)
+_with_x(m::Pade, g) = Pade(m.n, m.m; x = g)
+_with_x(m::PadeCF, g) = PadeCF(m.n, m.m; x = g)
+_with_x(m::HermitePade, g) = HermitePade(m.n, m.m, m.l; x = g, branch = m.branch)
+_with_x(m::BorelPade, g) = BorelPade(m.n, m.m; x = g, m.kwargs...)
+_with_x(m::BorelPadeLateral, g) =
+    BorelPadeLateral(m.n, m.m; x = g, side = m.side, m.kwargs...)
+_with_x(m::BorelPadeMedian, g) = BorelPadeMedian(m.n, m.m; x = g, m.kwargs...)
+_with_x(m::BorelLeRoyPade, g) =
+    BorelLeRoyPade(m.n, m.m; b = m.b, x = g, m.kwargs...)
+_with_x(m::ConformalBorelPade, g) =
+    ConformalBorelPade(m.n, m.m; x = g, sing = m.sing, m.kwargs...)
+_with_x(m::MeijerG, g) = MeijerG(m.n; x = g, m.kwargs...)
+
+"""
+    resum_transseries(ts::TransSeries, g; method::AbstractResummation)
+
+Numerically evaluate `ts` at coupling `g`. For each sector
+`(Sⱼ, βⱼ, aⱼ)`, the perturbative tail `aⱼ` is resummed via
+`resum(method, aⱼ)` with `method`'s evaluation point rebound to `g`; the
+result is multiplied by the prefactor `e^{-Sⱼ/g} g^{βⱼ}` and the
+contributions are summed.
+
+Sequence-accelerator methods (e.g. [`Shanks`](@ref), [`Richardson`](@ref))
+have no internal `x` and are passed through unchanged; the prefactor still
+uses `g` as the coupling.
+"""
+function resum_transseries(ts::TransSeries{T}, g;
+                           method::AbstractResummation) where {T<:Number}
+    method_g = _with_x(method, g)
+    return sum(_resum_sector(sec, g, method_g) for sec in ts.sectors)
+end
+
+function _resum_sector(sec::Sector, g, method_g::AbstractResummation)
+    pert = resum(method_g, sec.a)
+    prefactor = exp(-sec.S / g) * g^sec.β
+    return prefactor * pert
+end

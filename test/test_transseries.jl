@@ -169,3 +169,58 @@ using Resurgence
         @test ts.sectors[1].a ≈ BigFloat[4.0, 6.0]
     end
 end
+
+@testset "resum_transseries" begin
+    @testset "single perturbative sector matches resum at x=g" begin
+        a = ones(Float64, 6)
+        ts = TransSeries(a)
+        @test resum_transseries(ts, 0.5; method = Pade(0, 1)) ≈
+              resum(Pade(0, 1; x = 0.5), a)
+    end
+
+    @testset "two-sector hand-computable case" begin
+        # Pert sector [1, 0, 0] → 1; instanton sector S=1, β=0, a=[c, 0, 0] → c.
+        # At g = 0.5 the answer is 1 + c·exp(-2).
+        c = 0.7
+        ts = TransSeries([Sector(0.0, 0.0, [1.0, 0.0, 0.0]),
+                          Sector(1.0, 0.0, [c, 0.0, 0.0])])
+        v = resum_transseries(ts, 0.5; method = Shanks(2))
+        @test v ≈ 1.0 + c * exp(-2.0)
+    end
+
+    @testset "β ≠ 0 prefactor is applied" begin
+        # Single sector with β = 1/2 at g = 0.25 → prefactor = √(0.25) = 0.5,
+        # pert ≡ 1, so result = 0.5.
+        ts = TransSeries([Sector(0.0, 0.5, [1.0, 0.0, 0.0])])
+        @test resum_transseries(ts, 0.25; method = Pade(0, 0)) ≈ 0.5
+    end
+
+    @testset "BorelPade is dispatched per sector with x = g" begin
+        a_stieltjes = Float64[(-1.0)^k * Float64(factorial(big(k))) for k in 0:24]
+        a_const = ones(Float64, 25)
+        ts = TransSeries([Sector(0.0, 0.0, a_stieltjes),
+                          Sector(1.0, 0.0, a_const)])
+        g = 1.0
+        v = resum_transseries(ts, g; method = BorelPade(10, 10))
+        expected = borel_pade(a_stieltjes; n = 10, m = 10, x = g) +
+                   exp(-1.0 / g) *
+                   borel_pade(a_const; n = 10, m = 10, x = g)
+        @test v ≈ expected
+    end
+
+    @testset "BorelPade kwargs round-trip through _with_x" begin
+        a_stieltjes = Float64[(-1.0)^k * Float64(factorial(big(k))) for k in 0:24]
+        ts = TransSeries(a_stieltjes)
+        v = resum_transseries(ts, 1.0; method = BorelPade(10, 10; rtol = 1e-3))
+        @test isapprox(v, 0.5963473623; atol = 1e-3)
+    end
+
+    @testset "BigFloat g propagates through the sector loop" begin
+        ts = TransSeries([Sector(big"0.0", big"0.0", BigFloat[1, 0, 0]),
+                          Sector(big"1.0", big"0.0", BigFloat[1, 0, 0])])
+        g = BigFloat("0.5")
+        v = resum_transseries(ts, g; method = Pade(0, 0))
+        @test v isa BigFloat
+        @test v ≈ 1 + exp(-BigFloat(2))
+    end
+end

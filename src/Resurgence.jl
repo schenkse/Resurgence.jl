@@ -50,6 +50,6 @@ export AbstractResummation, Shanks, Richardson, WynnEps, Pade, PadeCF, HermitePa
 export resum
 
 # trans-series
-export Sector, TransSeries, transseries_exp
+export Sector, TransSeries, transseries_exp, resum_transseries
 
 end # module
