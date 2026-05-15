@@ -60,3 +60,50 @@ using Resurgence
         @test v ≈ 1.0
     end
 end
+
+@testset "weniger" begin
+    @testset "Stieltjes series — textbook driver" begin
+        ref = 0.5963473623231940743410784993
+        a = Float64[(-1.0)^k * Float64(factorial(big(k))) for k in 0:24]
+        v = weniger(a, 3; depth = 15)
+        @test abs(v - ref) < 1e-11
+        # Weniger is sharper than Levin u on factorial divergence.
+        vL = levin(a, 3; depth = 15, variant = :u)
+        @test abs(v - ref) ≤ abs(vL - ref)
+    end
+
+    @testset "Leibniz / Gregory series for π" begin
+        N = 30
+        a = Float64[4 * (-1.0)^k / (2k + 1) for k in 0:N-1]
+        v = weniger(a, 3; depth = 20)
+        @test abs(v - π) < 1e-12
+    end
+
+    @testset "argument validation" begin
+        a = collect(1.0:6.0)
+        @test_throws ArgumentError weniger(a, 1; depth = 0)
+        @test_throws ArgumentError weniger(a, 0; depth = 3)
+        @test_throws ArgumentError weniger(a, 1; depth = 6)  # needs a[8]
+    end
+
+    @testset "BigFloat propagates" begin
+        N = 30
+        a = BigFloat[(-1)^k * factorial(big(k)) for k in 0:N-1]
+        v = weniger(a, 3; depth = 25)
+        @test v isa BigFloat
+        ref = BigFloat("0.59634736232319407434107849936927937")
+        # Asymptotic accuracy improves geometrically with depth; depth=25 on
+        # 30 BigFloat terms is ~16 digits, well past Float64.
+        @test abs(v - ref) < 1e-15
+    end
+
+    @testset "Complex linearity" begin
+        N = 30
+        a_real = Float64[4 * (-1.0)^k / (2k + 1) for k in 0:N-1]
+        a_cplx = ComplexF64.(a_real) .* (1 + 0.1im)
+        v_real = weniger(a_real, 3; depth = 20)
+        v_cplx = weniger(a_cplx, 3; depth = 20)
+        @test v_cplx isa ComplexF64
+        @test v_cplx ≈ v_real * (1 + 0.1im)
+    end
+end

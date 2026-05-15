@@ -95,6 +95,12 @@ using Resurgence
         @test resum(Levin(3; variant = :u), a) ≈ levin(a, 3; variant = :u)
     end
 
+    @testset "Weniger dispatches with depth/β" begin
+        a = Float64[(-1.0)^k * Float64(factorial(big(k))) for k in 0:24]
+        @test resum(Weniger(3; depth = 15), a) ≈ weniger(a, 3; depth = 15)
+        @test resum(Weniger(3), a) ≈ weniger(a, 3)
+    end
+
     @testset "kwargs forwarded to underlying call" begin
         # rtol forwarded; loose tol shouldn't make this fail catastrophically.
         v = resum(BorelPade(10, 10; rtol = 1e-3), a_stieltjes)

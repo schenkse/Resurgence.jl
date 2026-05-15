@@ -225,6 +225,24 @@ struct Levin{B,K} <: AbstractResummation
 end
 
 """
+    Weniger(n; depth = nothing, β = 1)
+
+Weniger δ-transformation tag. `resum(Weniger(n; depth, β), a)` calls
+`weniger(a, n; depth, β)`. With `depth = nothing` (default), the function-
+level default `length(a) - n - 1` is used at dispatch time.
+"""
+struct Weniger{B,K} <: AbstractResummation
+    n::Int
+    depth::Union{Int,Nothing}
+    β::B
+    kwargs::K
+    Weniger(n::Integer; depth::Union{Integer,Nothing} = nothing,
+            β::Real = 1, kwargs...) =
+        new{typeof(β),typeof(kwargs)}(Int(n),
+            depth === nothing ? nothing : Int(depth), β, kwargs)
+end
+
+"""
     resum(method::AbstractResummation, a)
 
 Apply `method` to the formal power series with coefficients `a`.
@@ -250,3 +268,6 @@ resum(ab::Abel, a) = abel(a; x = ab.x)
 resum(l::Levin, a) = l.depth === nothing ?
     levin(a, l.n; variant = l.variant, β = l.β, l.kwargs...) :
     levin(a, l.n; depth = l.depth, variant = l.variant, β = l.β, l.kwargs...)
+resum(w::Weniger, a) = w.depth === nothing ?
+    weniger(a, w.n; β = w.β, w.kwargs...) :
+    weniger(a, w.n; depth = w.depth, β = w.β, w.kwargs...)
