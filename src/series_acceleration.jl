@@ -187,3 +187,57 @@ function _wynn_eps_iter(S::AbstractVector{T}, depth::Integer) where {T<:Number}
     end
     return last(col_prev)
 end
+
+"""
+    cesaro(a, n; depth = 1)
+
+Cesàro mean of the partial sums of `a` at index `n`. With `depth = d`, the
+arithmetic-mean averaging is iterated `d` times; `depth = 1` is the standard
+(C, 1) Cesàro sum.
+
+`a[k]` is the k-th term of the series; with partial sums `Aⱼ = sum(a[1:j])`,
+
+    C⁽¹⁾ₙ = (1/n) Σⱼ₌₁ⁿ Aⱼ,    C⁽ᵏ⁺¹⁾ₙ = (1/n) Σⱼ₌₁ⁿ C⁽ᵏ⁾ⱼ.
+
+Useful mainly as a baseline against more aggressive accelerators; recovers the
+limit of `(C, k)`-summable sequences with `depth = k`.
+"""
+function cesaro(a::AbstractVector{T}, n::Integer; depth::Integer = 1) where {T<:Number}
+    depth ≥ 1 || throw(ArgumentError("depth must be ≥ 1"))
+    n ≥ 1 || throw(ArgumentError("n must be ≥ 1"))
+    n ≤ length(a) || throw(ArgumentError("need length(a) ≥ n, got $(length(a))"))
+    cur = Vector{T}(undef, n)
+    acc = zero(T)
+    @inbounds for k in 1:n
+        acc += a[k]
+        cur[k] = acc
+    end
+    for _ in 1:depth
+        s = zero(T)
+        @inbounds for k in 1:n
+            s += cur[k]
+            cur[k] = s / T(k)
+        end
+    end
+    return last(cur)
+end
+
+"""
+    abel(a; x = 1)
+
+Truncated Abel-style evaluation `Σₖ a[k+1] xᵏ` via Horner's method. The
+classical Abel sum is the radial limit `x → 1⁻`; this function evaluates the
+finite power series at a user-supplied `x` (default `x = 1`, which reduces to
+the plain partial sum). Useful as a baseline and as a building block when
+sweeping `x` towards 1.
+"""
+function abel(a::AbstractVector{T}; x = one(real(T))) where {T<:Number}
+    R = promote_type(T, typeof(x))
+    isempty(a) && return zero(R)
+    xR = convert(R, x)
+    acc = zero(R)
+    @inbounds for k in length(a):-1:1
+        acc = acc * xR + a[k]
+    end
+    return acc
+end

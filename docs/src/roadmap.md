@@ -15,7 +15,6 @@ This page is a working list of those items, sized and sketched enough to start a
 | A4  | Brezinski ρ-algorithm                    | Acceleration       | S    | Planned |
 | A5  | Aitken–Steffensen for fixed points       | Acceleration       | S    | Planned |
 | A6  | Sidi S-transformation (W-algorithm)      | Acceleration       | S    | Planned |
-| A7  | Cesàro/Abel summation                  | Acceleration       | S    | Planned |
 | B1  | Trans-series type and arithmetic         | Borel/resurgence | L    | Planned |
 | B2  | Per-sector trans-series resummation      | Borel/resurgence | S    | Planned |
 | B3  | Hyperasymptotic remainders               | Borel/resurgence | M    | Planned |
@@ -96,17 +95,6 @@ Recursion mixes 4 tableau entries.
 
 **Reuses.** A1 infrastructure.
 **API tag.** `SidiS(n; …)`.
-
-### A7 — Cesàro/Abel summation  · *Small*
-
-**Goal.** `cesaro(a, n)` and `abel(a; x)` (radial limit `lim_{x→1⁻} Σ aₖ xᵏ`).
-
-**Why now.** Mainly for completeness and as baselines; very cheap to implement and useful for sanity checks against more sophisticated methods.
-
-**Sketch.** Append to [src/series_acceleration.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/series_acceleration.jl).
-
-**Reuses.** Existing partial-sum machinery.
-**API tag.** `Cesaro`, `Abel(x)`.
 
 ## B. Borel side/resurgence-specific (core)
 

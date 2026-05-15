@@ -69,6 +69,17 @@ using Resurgence
         @test resum(WynnEps(5; depth = 3), a) ≈ wynn_eps(a, 5; depth = 3)
     end
 
+    @testset "Cesaro dispatches with depth" begin
+        N = 100
+        a = Float64[4 * (-1.0)^k / (2k + 1) for k in 0:N-1]
+        @test resum(Cesaro(N; depth = 2), a) ≈ cesaro(a, N; depth = 2)
+    end
+
+    @testset "Abel dispatches with x" begin
+        a = ones(Float64, 8)
+        @test resum(Abel(; x = 0.5), a) ≈ abel(a; x = 0.5)
+    end
+
     @testset "Richardson dispatches with depth" begin
         a = Float64[1 / k^2 for k in 1:30]
         @test resum(Richardson(10; depth = 3), a) ≈ richardson(a, 10; depth = 3)

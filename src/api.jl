@@ -185,6 +185,27 @@ struct MeijerG{X,K} <: AbstractResummation
 end
 
 """
+    Cesaro(n; depth = 1)
+
+Cesàro-summation tag. `resum(Cesaro(n; depth), a)` calls `cesaro(a, n; depth)`.
+"""
+struct Cesaro <: AbstractResummation
+    n::Int
+    depth::Int
+    Cesaro(n::Integer; depth::Integer = 1) = new(Int(n), Int(depth))
+end
+
+"""
+    Abel(; x = 1)
+
+Abel-summation tag. `resum(Abel(; x), a)` calls `abel(a; x)`.
+"""
+struct Abel{X} <: AbstractResummation
+    x::X
+    Abel(; x = 1) = new{typeof(x)}(x)
+end
+
+"""
     resum(method::AbstractResummation, a)
 
 Apply `method` to the formal power series with coefficients `a`.
@@ -205,3 +226,5 @@ resum(bl::BorelLeRoyPade, a) =
 resum(cb::ConformalBorelPade, a) =
     conformal_borel_pade(a; n = cb.n, m = cb.m, x = cb.x, sing = cb.sing, cb.kwargs...)
 resum(mg::MeijerG, a) = borel_meijerg(a; n = mg.n, x = mg.x, mg.kwargs...)
+resum(c::Cesaro, a) = cesaro(a, c.n; depth = c.depth)
+resum(ab::Abel, a) = abel(a; x = ab.x)
