@@ -85,6 +85,16 @@ using Resurgence
         @test resum(Richardson(10; depth = 3), a) ≈ richardson(a, 10; depth = 3)
     end
 
+    @testset "Levin dispatches with depth/variant/β" begin
+        N = 30
+        a = Float64[4 * (-1.0)^k / (2k + 1) for k in 0:N-1]
+        @test resum(Levin(3; depth = 20, variant = :u), a) ≈
+              levin(a, 3; depth = 20, variant = :u)
+        @test resum(Levin(3; depth = 20, variant = :t), a) ≈
+              levin(a, 3; depth = 20, variant = :t)
+        @test resum(Levin(3; variant = :u), a) ≈ levin(a, 3; variant = :u)
+    end
+
     @testset "kwargs forwarded to underlying call" begin
         # rtol forwarded; loose tol shouldn't make this fail catastrophically.
         v = resum(BorelPade(10, 10; rtol = 1e-3), a_stieltjes)

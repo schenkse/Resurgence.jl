@@ -11,6 +11,7 @@ using SpecialFunctions
 include("utils.jl")
 include("poles.jl")
 include("series_acceleration.jl")
+include("levin.jl")
 include("pade.jl")
 include("pade_cf.jl")
 include("pade_hermite.jl")
@@ -24,6 +25,7 @@ include("api.jl")
 
 # functional API
 export shanks, richardson, wynn_eps, cesaro, abel
+export levin
 export pade, pade_value
 export pade_cf, pade_cf_value
 export hermite_pade, hermite_pade_value
@@ -41,7 +43,7 @@ export chop!, sparsify!
 export AbstractResummation, Shanks, Richardson, WynnEps, Pade, PadeCF, HermitePade,
     BorelPade, BorelPadeLateral, BorelPadeMedian,
     BorelLeRoyPade, ConformalBorelPade, MeijerG,
-    Cesaro, Abel
+    Cesaro, Abel, Levin
 export resum
 
 end # module

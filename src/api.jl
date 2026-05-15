@@ -206,6 +206,25 @@ struct Abel{X} <: AbstractResummation
 end
 
 """
+    Levin(n; depth = nothing, variant = :u, β = 1)
+
+Levin sequence-transformation tag. `resum(Levin(n; depth, variant, β), a)`
+calls `levin(a, n; depth, variant, β)`. With `depth = nothing` (default), the
+function-level default `length(a) - n - 1` is used at dispatch time.
+"""
+struct Levin{B,K} <: AbstractResummation
+    n::Int
+    depth::Union{Int,Nothing}
+    variant::Symbol
+    β::B
+    kwargs::K
+    Levin(n::Integer; depth::Union{Integer,Nothing} = nothing,
+          variant::Symbol = :u, β::Real = 1, kwargs...) =
+        new{typeof(β),typeof(kwargs)}(Int(n),
+            depth === nothing ? nothing : Int(depth), variant, β, kwargs)
+end
+
+"""
     resum(method::AbstractResummation, a)
 
 Apply `method` to the formal power series with coefficients `a`.
@@ -228,3 +247,6 @@ resum(cb::ConformalBorelPade, a) =
 resum(mg::MeijerG, a) = borel_meijerg(a; n = mg.n, x = mg.x, mg.kwargs...)
 resum(c::Cesaro, a) = cesaro(a, c.n; depth = c.depth)
 resum(ab::Abel, a) = abel(a; x = ab.x)
+resum(l::Levin, a) = l.depth === nothing ?
+    levin(a, l.n; variant = l.variant, β = l.β, l.kwargs...) :
+    levin(a, l.n; depth = l.depth, variant = l.variant, β = l.β, l.kwargs...)
