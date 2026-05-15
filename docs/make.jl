@@ -24,6 +24,7 @@ makedocs(;
             "Stieltjes / Euler series"      => "tutorials/stieltjes.md",
             "Lateral and median sums"       => "tutorials/lateral_sums.md",
             "Stokes / large-order diagnostics" => "tutorials/stokes_diagnostics.md",
+            "Trans-series"                  => "tutorials/transseries.md",
         ],
         "Methods guide" => "methods_guide.md",
         "API reference" => [

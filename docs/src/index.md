@@ -64,7 +64,7 @@ Per-method functions are canonical; the `resum(::AbstractResummation, …)` laye
 - Have a divergent series and want to know which method fits?
   Jump to the [Methods guide](methods_guide.md).
 - Want worked physics-style examples?
-  See the [Stieltjes tutorial](tutorials/stieltjes.md), [lateral and median sums](tutorials/lateral_sums.md), or [Stokes/large-order diagnostics](tutorials/stokes_diagnostics.md).
+  See the [Stieltjes tutorial](tutorials/stieltjes.md), [lateral and median sums](tutorials/lateral_sums.md), [Stokes/large-order diagnostics](tutorials/stokes_diagnostics.md), or [trans-series](tutorials/transseries.md).
 - Looking up a specific function?
   The API pages (sidebar) auto-generate from source docstrings.
 
