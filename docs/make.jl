@@ -38,7 +38,6 @@ makedocs(;
             "Trans-series"          => "api/transseries.md",
             "Unified `resum` API"   => "api/api.md",
         ],
-        "Roadmap"    => "roadmap.md",
         "References" => "references.md",
     ],
     checkdocs = :exports,
