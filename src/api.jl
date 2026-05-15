@@ -267,6 +267,25 @@ struct Weniger{B,K} <: AbstractResummation
 end
 
 """
+    SidiS(n; depth = nothing, variant = :u, β = 1)
+
+Sidi S-transformation tag. `resum(SidiS(n; depth, variant, β), a)` calls
+`sidi_s(a, n; depth, variant, β)`. With `depth = nothing` (default), the
+function-level default `length(a) - n - 1` is used at dispatch time.
+"""
+struct SidiS{B,K} <: AbstractResummation
+    n::Int
+    depth::Union{Int,Nothing}
+    variant::Symbol
+    β::B
+    kwargs::K
+    SidiS(n::Integer; depth::Union{Integer,Nothing} = nothing,
+          variant::Symbol = :u, β::Real = 1, kwargs...) =
+        new{typeof(β),typeof(kwargs)}(Int(n),
+            depth === nothing ? nothing : Int(depth), variant, β, kwargs)
+end
+
+"""
     resum(method::AbstractResummation, a)
 
 Apply `method` to the formal power series with coefficients `a`.
@@ -297,3 +316,6 @@ resum(l::Levin, a) = l.depth === nothing ?
 resum(w::Weniger, a) = w.depth === nothing ?
     weniger(a, w.n; β = w.β, w.kwargs...) :
     weniger(a, w.n; depth = w.depth, β = w.β, w.kwargs...)
+resum(s::SidiS, a) = s.depth === nothing ?
+    sidi_s(a, s.n; variant = s.variant, β = s.β, s.kwargs...) :
+    sidi_s(a, s.n; depth = s.depth, variant = s.variant, β = s.β, s.kwargs...)

@@ -114,6 +114,14 @@ using Resurgence
         @test resum(Weniger(3), a) ≈ weniger(a, 3)
     end
 
+    @testset "SidiS dispatches with depth/variant/β" begin
+        N = 30
+        a = Float64[4 * (-1.0)^k / (2k + 1) for k in 0:N-1]
+        @test resum(SidiS(3; depth = 15, variant = :u), a) ≈
+              sidi_s(a, 3; depth = 15, variant = :u)
+        @test resum(SidiS(3), a) ≈ sidi_s(a, 3)
+    end
+
     @testset "kwargs forwarded to underlying call" begin
         # rtol forwarded; loose tol shouldn't make this fail catastrophically.
         v = resum(BorelPade(10, 10; rtol = 1e-3), a_stieltjes)

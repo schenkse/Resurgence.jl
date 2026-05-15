@@ -163,3 +163,81 @@ function weniger(a::AbstractVector{T}, n::Integer;
     iszero(den) && return S[Np]
     return num / den
 end
+
+"""
+    sidi_s(a, n; depth = length(a) - n - 1, variant = :u, β = 1)
+
+Apply Sidi's S-transformation (W-algorithm) to the partial sums of `a` at
+index `n`. Algebraically related to [`levin`](@ref) but computed via a
+divided-difference recursion that is `O(depth)` per step instead of the
+`O(depth²)` explicit Levin sum, and is well-conditioned for oscillatory
+sequences.
+
+With partial sums `Aⱼ = sum(a[1:j])`, remainder estimates `ωₙ` chosen by
+`variant` (same `:u`/`:t`/`:v` choices as [`levin`](@ref)), and nodes
+`ψₙ = 1 / (n + β)`, the recursion is
+
+    M_0⁽ⁿ⁾ = Aₙ / ωₙ,                 N_0⁽ⁿ⁾ = 1 / ωₙ,
+    M_k⁽ⁿ⁾ = (M_{k−1}⁽ⁿ⁺¹⁾ − M_{k−1}⁽ⁿ⁾) / (ψₙ₊ₖ − ψₙ),
+    N_k⁽ⁿ⁾ = (N_{k−1}⁽ⁿ⁺¹⁾ − N_{k−1}⁽ⁿ⁾) / (ψₙ₊ₖ − ψₙ),
+
+and the result is `S_depth⁽ⁿ⁾ = M_depth⁽ⁿ⁾ / N_depth⁽ⁿ⁾`. The S-choice
+`ψₙ = 1/(n+β)` distinguishes the transformation from the more general
+W-algorithm and gives geometric convergence for series whose partial sums
+satisfy `Aₙ = A + ωₙ · ψ(n)` with `ψ(n) ∼ Σ cⱼ / nʲ`.
+
+`length(a) ≥ n + depth + 1` for `:v`; `length(a) ≥ n + depth` otherwise.
+Returns the partial sum `Aₙ₊depth` when the denominator vanishes at the
+last step.
+"""
+function sidi_s(a::AbstractVector{T}, n::Integer;
+                depth::Integer = length(a) - n - 1,
+                variant::Symbol = :u, β::Real = 1) where {T<:Number}
+    depth ≥ 1 || throw(ArgumentError("depth must be ≥ 1"))
+    n ≥ 1 || throw(ArgumentError("n must be ≥ 1"))
+    variant in (:u, :t, :v) ||
+        throw(ArgumentError("variant must be :u, :t, or :v; got :$variant"))
+    needed = variant === :v ? n + depth + 1 : n + depth
+    needed ≤ length(a) || throw(ArgumentError(
+        "need length(a) ≥ $needed for variant=:$variant, depth=$depth; got $(length(a))"))
+
+    R = promote_type(T, typeof(one(T) * β))
+    Np = n + depth
+    S = Vector{R}(undef, Np)
+    acc = zero(R)
+    @inbounds for k in 1:Np
+        acc += a[k]
+        S[k] = acc
+    end
+
+    invω = _levin_inv_omega(R, a, n, depth, variant, β)
+
+    M = Vector{R}(undef, depth + 1)
+    N = Vector{R}(undef, depth + 1)
+    @inbounds for j in 0:depth
+        M[j+1] = S[n+j] * invω[j+1]
+        N[j+1] = invω[j+1]
+    end
+    ψ = Vector{R}(undef, depth + 1)
+    @inbounds for j in 0:depth
+        ψ[j+1] = inv(R(n + j + β))
+    end
+
+    L = depth + 1
+    for k in 1:depth
+        Lnew = L - 1
+        Mnew = Vector{R}(undef, Lnew)
+        Nnew = Vector{R}(undef, Lnew)
+        @inbounds for j in 1:Lnew
+            denψ = ψ[j+k] - ψ[j]
+            iszero(denψ) && return S[Np]
+            Mnew[j] = (M[j+1] - M[j]) / denψ
+            Nnew[j] = (N[j+1] - N[j]) / denψ
+        end
+        M = Mnew
+        N = Nnew
+        L = Lnew
+    end
+    iszero(N[1]) && return S[Np]
+    return M[1] / N[1]
+end

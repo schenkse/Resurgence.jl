@@ -27,7 +27,7 @@ include("api.jl")
 export shanks, richardson, wynn_eps, cesaro, abel
 export theta_brezinski, rho_brezinski
 export aitken_steffensen
-export levin, weniger
+export levin, weniger, sidi_s
 export pade, pade_value
 export pade_cf, pade_cf_value
 export hermite_pade, hermite_pade_value
@@ -45,7 +45,7 @@ export chop!, sparsify!
 export AbstractResummation, Shanks, Richardson, WynnEps, Pade, PadeCF, HermitePade,
     BorelPade, BorelPadeLateral, BorelPadeMedian,
     BorelLeRoyPade, ConformalBorelPade, MeijerG,
-    Cesaro, Abel, Levin, Weniger, BrezinskiTheta, BrezinskiRho
+    Cesaro, Abel, Levin, Weniger, SidiS, BrezinskiTheta, BrezinskiRho
 export resum
 
 end # module

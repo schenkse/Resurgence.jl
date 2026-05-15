@@ -107,3 +107,53 @@ end
         @test v_cplx ≈ v_real * (1 + 0.1im)
     end
 end
+
+@testset "sidi_s" begin
+    @testset "Leibniz / Gregory series for π" begin
+        N = 30
+        a = Float64[4 * (-1.0)^k / (2k + 1) for k in 0:N-1]
+        for variant in (:u, :t, :v)
+            v = sidi_s(a, 3; depth = 15, variant = variant)
+            @test abs(v - π) < 1e-12
+        end
+    end
+
+    @testset "Alternating square-root series — η(1/2)" begin
+        # Σ (-1)^k / √(k+1) = η(1/2) = (1 − √2) ζ(1/2) ≈ 0.6048986434216307;
+        # slowly oscillatory, the regime where Sidi S is designed to win.
+        ref = 0.6048986434216307
+        N = 30
+        a = Float64[(-1.0)^k / sqrt(k + 1) for k in 0:N-1]
+        v = sidi_s(a, 3; depth = 15, variant = :u)
+        @test abs(v - ref) < 1e-12
+    end
+
+    @testset "argument validation" begin
+        a = collect(1.0:6.0)
+        @test_throws ArgumentError sidi_s(a, 1; depth = 0)
+        @test_throws ArgumentError sidi_s(a, 0; depth = 3)
+        @test_throws ArgumentError sidi_s(a, 1; depth = 10, variant = :u)
+        @test_throws ArgumentError sidi_s(a, 1; depth = 6, variant = :v)
+        @test_throws ArgumentError sidi_s(a, 1; depth = 2, variant = :bogus)
+    end
+
+    @testset "BigFloat propagates" begin
+        N = 30
+        # Divide in BigFloat — using Int ÷ Int and then promoting silently
+        # drops to Float64 precision before the BigFloat[] constructor sees it.
+        a = BigFloat[4 * (-1)^k / BigFloat(2k + 1) for k in 0:N-1]
+        v = sidi_s(a, 3; depth = 20, variant = :u)
+        @test v isa BigFloat
+        @test abs(v - BigFloat(π)) < 1e-20
+    end
+
+    @testset "Complex linearity" begin
+        N = 30
+        a_real = Float64[4 * (-1.0)^k / (2k + 1) for k in 0:N-1]
+        a_cplx = ComplexF64.(a_real) .* (1 + 0.1im)
+        v_real = sidi_s(a_real, 3; depth = 15, variant = :u)
+        v_cplx = sidi_s(a_cplx, 3; depth = 15, variant = :u)
+        @test v_cplx isa ComplexF64
+        @test v_cplx ≈ v_real * (1 + 0.1im)
+    end
+end
