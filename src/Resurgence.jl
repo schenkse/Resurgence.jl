@@ -22,6 +22,7 @@ include("meijerg.jl")
 include("truncation.jl")
 include("stokes.jl")
 include("api.jl")
+include("transseries.jl")
 
 # functional API
 export shanks, richardson, wynn_eps, cesaro, abel
@@ -47,5 +48,8 @@ export AbstractResummation, Shanks, Richardson, WynnEps, Pade, PadeCF, HermitePa
     BorelLeRoyPade, ConformalBorelPade, MeijerG,
     Cesaro, Abel, Levin, Weniger, SidiS, BrezinskiTheta, BrezinskiRho
 export resum
+
+# trans-series
+export Sector, TransSeries, transseries_exp
 
 end # module

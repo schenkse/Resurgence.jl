@@ -22,5 +22,6 @@ using Resurgence
     include("test_truncation.jl")
     include("test_stokes.jl")
     include("test_api.jl")
+    include("test_transseries.jl")
     include("test_aqua.jl")
 end
