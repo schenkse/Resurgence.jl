@@ -343,6 +343,49 @@ function cesaro(a::AbstractVector{T}, n::Integer; depth::Integer = 1) where {T<:
 end
 
 """
+    aitken_steffensen(g, x0; tol = eps(real(typeof(x0))) * 100, maxiter = 100)
+
+Steffensen's iteration for a fixed point of `g`. Each step evaluates `g`
+twice, then Aitken-Δ² accelerates:
+
+    y = g(x),    z = g(y),
+    x_new = x − (y − x)² / (z − 2 y + x).
+
+Converges quadratically when `g` has a simple attractive fixed point, in
+contrast to the linear convergence of plain `xₖ₊₁ = g(xₖ)` iteration.
+Returns when `|y − x| ≤ tol` (the iterate has landed on the fixed point)
+or `|x_new − x| ≤ tol`. Throws `ArgumentError` if the Δ² denominator
+vanishes away from the fixed point (linear iteration with no curvature —
+e.g. `g(x) = x + c`), or if `maxiter` is exhausted.
+"""
+function aitken_steffensen(g, x0::T;
+                           tol::Real = eps(real(T)) * 100,
+                           maxiter::Integer = 100) where {T<:Number}
+    maxiter ≥ 1 || throw(ArgumentError("maxiter must be ≥ 1"))
+    x = x0
+    for _ in 1:maxiter
+        y = g(x)
+        Δ = y - x
+        if abs(Δ) ≤ tol
+            return x
+        end
+        z = g(y)
+        den = z - 2*y + x
+        if abs(den) ≤ tol
+            throw(ArgumentError("aitken_steffensen breakdown: Δ² denominator " *
+                                "vanished at x = $x with y − x = $Δ; the iteration " *
+                                "has no curvature to accelerate"))
+        end
+        xnew = x - Δ * Δ / den
+        if abs(xnew - x) ≤ tol
+            return xnew
+        end
+        x = xnew
+    end
+    throw(ArgumentError("aitken_steffensen did not converge in $maxiter iterations"))
+end
+
+"""
     abel(a; x = 1)
 
 Truncated Abel-style evaluation `Σₖ a[k+1] xᵏ` via Horner's method. The

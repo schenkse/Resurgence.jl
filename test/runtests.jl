@@ -10,6 +10,7 @@ using Resurgence
     include("test_theta_brezinski.jl")
     include("test_rho_brezinski.jl")
     include("test_cesaro_abel.jl")
+    include("test_aitken_steffensen.jl")
     include("test_levin.jl")
     include("test_pade.jl")
     include("test_pade_cf.jl")
