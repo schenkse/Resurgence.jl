@@ -3,6 +3,7 @@
 Resummation techniques for divergent and asymptotic series, in pure Julia.
 
 The package targets resurgence and perturbative-physics workflows: take a formal power series with factorially-growing coefficients, recover a Borel-summable result, and read off the large-order data (instanton action, exponent, prefactor) when you need it.
+Trans-series — sectors of the form `e^{−S/g} g^β (Σₖ aₖ gᵏ)` with non-perturbative prefactors — are first-class objects with their own arithmetic and per-sector resummation.
 Every method is generic over the input element type — `Float64`, `BigFloat`, `Complex{T}` — and there are no Python dependencies.
 
 ## What's included
@@ -16,6 +17,7 @@ Every method is generic over the input element type — `Float64`, `BigFloat`, `
 | Closed-form             | Meijer-G via Slater collapse onto `pFq` |
 | Truncation              | Optimal truncation, superasymptotic remainder |
 | Diagnostics             | Stokes action, exponent, constant, joint fit |
+| Trans-series            | `Sector` / `TransSeries` types with action-additive arithmetic, per-sector resummation via `resum_transseries` |
 
 For deciding which method to use on which series, see the [Methods guide](methods_guide.md).
 

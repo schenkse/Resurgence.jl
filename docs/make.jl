@@ -34,6 +34,7 @@ makedocs(;
             "Meijer-G"              => "api/meijerg.md",
             "Truncation"            => "api/truncation.md",
             "Stokes diagnostics"    => "api/stokes.md",
+            "Trans-series"          => "api/transseries.md",
             "Unified `resum` API"   => "api/api.md",
         ],
         "Roadmap"    => "roadmap.md",
