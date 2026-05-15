@@ -8,6 +8,7 @@ using Resurgence
     include("test_richardson.jl")
     include("test_wynn_eps.jl")
     include("test_theta_brezinski.jl")
+    include("test_rho_brezinski.jl")
     include("test_cesaro_abel.jl")
     include("test_levin.jl")
     include("test_pade.jl")

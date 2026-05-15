@@ -256,6 +256,59 @@ function _theta_brezinski_iter(S::AbstractVector{T}, depth::Integer) where {T<:N
 end
 
 """
+    rho_brezinski(a, n; depth = 1)
+
+Apply Brezinski's ρ-algorithm to the partial sums of `a` and return the
+entry at even column `2·depth` of the ρ-tableau.
+
+`a[k]` is the k-th term of the series; with partial sums `Aⱼ = sum(a[1:j])`,
+
+    ρ_{-1}^{(n)} = 0,    ρ_0^{(n)} = Aₙ,
+    ρ_{k+1}^{(n)} = ρ_{k-1}^{(n+1)} + (k + 1) / (ρ_k^{(n+1)} − ρ_k^{(n)}).
+
+Structurally identical to [`wynn_eps`](@ref) but with `(k + 1)` numerator,
+which makes the tableau converge geometrically on logarithmically
+convergent sequences `Aₙ ≈ A + C/nᵖ` with non-integer `p` — the regime
+where [`richardson`](@ref) (designed for integer power-law tails) stalls.
+
+When two consecutive column-`k` entries coincide the recursion would divide
+by zero; the implementation returns that entry instead of `NaN`/`Inf`.
+"""
+function rho_brezinski(a::AbstractVector{T}, n::Integer;
+                       depth::Integer = 1) where {T<:Number}
+    depth ≥ 1 || throw(ArgumentError("depth must be ≥ 1"))
+    n ≥ 1 || throw(ArgumentError("n must be ≥ 1"))
+    N = n + 2 * depth
+    N ≤ length(a) || throw(ArgumentError(
+        "need length(a) ≥ n+2·depth = $N, got $(length(a))"))
+    S = Vector{T}(undef, N)
+    acc = zero(T)
+    @inbounds for k in 1:N
+        acc += a[k]
+        S[k] = acc
+    end
+    return _rho_brezinski_iter(S, depth)
+end
+
+function _rho_brezinski_iter(S::AbstractVector{T}, depth::Integer) where {T<:Number}
+    N = length(S)
+    col_prev2 = zeros(T, N)
+    col_prev = collect(S)
+    for k in 1:(2 * depth)
+        L = length(col_prev) - 1
+        nxt = Vector{T}(undef, L)
+        @inbounds for j in 1:L
+            d = col_prev[j+1] - col_prev[j]
+            iszero(d) && return col_prev[j+1]
+            nxt[j] = col_prev2[j+1] + T(k) / d
+        end
+        col_prev2 = col_prev
+        col_prev = nxt
+    end
+    return last(col_prev)
+end
+
+"""
     cesaro(a, n; depth = 1)
 
 Cesàro mean of the partial sums of `a` at index `n`. With `depth = d`, the

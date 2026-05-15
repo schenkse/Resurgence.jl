@@ -76,6 +76,12 @@ using Resurgence
               theta_brezinski(a, 5; depth = 3)
     end
 
+    @testset "BrezinskiRho dispatches with depth" begin
+        a = Float64[1 / k^2 for k in 1:30]
+        @test resum(BrezinskiRho(10; depth = 3), a) ≈
+              rho_brezinski(a, 10; depth = 3)
+    end
+
     @testset "Cesaro dispatches with depth" begin
         N = 100
         a = Float64[4 * (-1.0)^k / (2k + 1) for k in 0:N-1]
