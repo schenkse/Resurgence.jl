@@ -286,6 +286,21 @@ struct SidiS{B,K} <: AbstractResummation
 end
 
 """
+    Hyperasymptotic(; x = 1, level = 1, kwargs...)
+
+Hyperasymptotic-truncation tag. `resum(Hyperasymptotic(; x, level, kwargs...), a)`
+calls `hyperasymptotic(a; x, level, kwargs...)`. `kwargs` may include
+`action`, `β`, `A` to override the defaults derived from `stokes_fit`.
+"""
+struct Hyperasymptotic{X,K} <: AbstractResummation
+    x::X
+    level::Int
+    kwargs::K
+    Hyperasymptotic(; x = 1, level::Integer = 1, kwargs...) =
+        new{typeof(x),typeof(kwargs)}(x, Int(level), kwargs)
+end
+
+"""
     resum(method::AbstractResummation, a)
 
 Apply `method` to the formal power series with coefficients `a`.
@@ -319,3 +334,4 @@ resum(w::Weniger, a) = w.depth === nothing ?
 resum(s::SidiS, a) = s.depth === nothing ?
     sidi_s(a, s.n; variant = s.variant, β = s.β, s.kwargs...) :
     sidi_s(a, s.n; depth = s.depth, variant = s.variant, β = s.β, s.kwargs...)
+resum(h::Hyperasymptotic, a) = hyperasymptotic(a; x = h.x, level = h.level, h.kwargs...)

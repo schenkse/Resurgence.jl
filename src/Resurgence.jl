@@ -38,7 +38,7 @@ export borel_pade, borel_leroy_pade, conformal_borel_pade
 export borel_pade_lateral, borel_pade_median, borel_pade_discontinuity
 export borel_leroy_pade_lateral, borel_leroy_pade_median, borel_leroy_pade_discontinuity
 export borel_meijerg
-export optimal_truncation, superasymptotic_remainder
+export optimal_truncation, superasymptotic_remainder, terminant, hyperasymptotic
 export stokes_action, stokes_exponent, stokes_constant, stokes_fit
 export chop!, sparsify!
 
@@ -46,7 +46,8 @@ export chop!, sparsify!
 export AbstractResummation, Shanks, Richardson, WynnEps, Pade, PadeCF, HermitePade,
     BorelPade, BorelPadeLateral, BorelPadeMedian,
     BorelLeRoyPade, ConformalBorelPade, MeijerG,
-    Cesaro, Abel, Levin, Weniger, SidiS, BrezinskiTheta, BrezinskiRho
+    Cesaro, Abel, Levin, Weniger, SidiS, BrezinskiTheta, BrezinskiRho,
+    Hyperasymptotic
 export resum
 
 # trans-series
