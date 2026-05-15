@@ -2,21 +2,20 @@
 
 Resurgence.jl ships a working classical-resummation toolkit: Shanks and Richardson acceleration, Padé and Borel/Borel–Le Roy/(single-singularity) conformal Borel–Padé, Meijer-G via the Slater-collapse onto `pFq`, optimal truncation, and lateral/median/discontinuity Borel–Padé with Stokes/large-order diagnostics on top.
 
-The remaining gaps are mostly on the resurgence-specific side — first-class trans-series, hyperasymptotic remainders, multi-singularity conformal maps, order-dependent mapping — and a handful of standard sequence-acceleration tools (Levin, Weniger, Wynn ε, Brezinski θ/ρ, Sidi S) that users expect to find.
+The remaining gaps are mostly on the resurgence-specific side — first-class trans-series, hyperasymptotic remainders, multi-singularity conformal maps, order-dependent mapping — and a handful of standard sequence-acceleration tools (Levin, Weniger, Brezinski θ/ρ, Sidi S) that users expect to find.
 This page is a working list of those items, sized and sketched enough to start a focused implementation task.
 
 ## Status at a glance
 
 | ID  | Technique                                | Section            | Size | Status  |
 | --- | ---------------------------------------- | ------------------ | ---- | ------- |
-| A1  | Wynn ε-algorithm                         | Acceleration       | S    | Planned |
-| A2  | Levin u/t/v transforms               | Acceleration       | M    | Planned |
-| A3  | Weniger δ-transformation                 | Acceleration       | S    | Planned |
-| A4  | Brezinski θ-algorithm                    | Acceleration       | S    | Planned |
-| A5  | Brezinski ρ-algorithm                    | Acceleration       | S    | Planned |
-| A6  | Aitken–Steffensen for fixed points       | Acceleration       | S    | Planned |
-| A7  | Sidi S-transformation (W-algorithm)      | Acceleration       | S    | Planned |
-| A8  | Cesàro/Abel summation                  | Acceleration       | S    | Planned |
+| A1  | Levin u/t/v transforms               | Acceleration       | M    | Planned |
+| A2  | Weniger δ-transformation                 | Acceleration       | S    | Planned |
+| A3  | Brezinski θ-algorithm                    | Acceleration       | S    | Planned |
+| A4  | Brezinski ρ-algorithm                    | Acceleration       | S    | Planned |
+| A5  | Aitken–Steffensen for fixed points       | Acceleration       | S    | Planned |
+| A6  | Sidi S-transformation (W-algorithm)      | Acceleration       | S    | Planned |
+| A7  | Cesàro/Abel summation                  | Acceleration       | S    | Planned |
 | B1  | Trans-series type and arithmetic         | Borel/resurgence | L    | Planned |
 | B2  | Per-sector trans-series resummation      | Borel/resurgence | S    | Planned |
 | B3  | Hyperasymptotic remainders               | Borel/resurgence | M    | Planned |
@@ -29,20 +28,7 @@ Per-item entries below use the same fixed layout — **Goal**, **Why now**, **Sk
 
 ## A. Sequence acceleration (general-purpose utilities)
 
-### A1 — Wynn ε-algorithm  · *Small*
-
-**Goal.** Tableau form of iterated Shanks via `ε^{(n)}_{k+1} = ε^{(n+1)}_{k-1} + 1/(ε^{(n+1)}_k − ε^{(n)}_k)`.
-
-**Why now.** Cleaner and numerically more stable than the partial-sum recursion in [src/series_acceleration.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/series_acceleration.jl) `_shanks_iter` for high `depth`.
-Standard in the literature; users expect it.
-
-**Sketch.** New `wynn_eps(a, n; depth)` in [src/series_acceleration.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/series_acceleration.jl).
-Operates on the tableau directly; even-column entries are the meaningful approximants.
-
-**Reuses.** Same partial-sum prelude as `_shanks_iter`.
-**API tag.** `WynnEps <: AbstractResummation` in [src/api.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/api.jl).
-
-### A2 — Levin transforms (u, t, v)  · *Medium*
+### A1 — Levin transforms (u, t, v)  · *Medium*
 
 **Goal.** `L_k^{(n)} = Σⱼ (−1)ʲ C(k,j) (n+j+β)^{k−1} Aₙ₊ⱼ/ωₙ₊ⱼ/Σⱼ (−1)ʲ C(k,j) (n+j+β)^{k−1}/ωₙ₊ⱼ` with three remainder estimators ωₙ: `aₙ` (t), `(n+β) aₙ` (u), `aₙ aₙ₊₁/(aₙ₊₁−aₙ)` (v).
 
@@ -55,41 +41,41 @@ Pure-Julia, element-type generic.
 **Reuses.** `inv_factorials` from [src/utils.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/utils.jl) for binomial coefficients (or compute `C(k,j)` iteratively).
 **API tag.** `Levin(n; variant, β)`.
 
-### A3 — Weniger δ-transformation  · *Small* (after A2)
+### A2 — Weniger δ-transformation  · *Small* (after A1)
 
 **Goal.** Levin-style transform with ωₙ = `(β+n)(β+n+1) … aₙ` factorial weighting; ratio of two finite sums.
 
 **Why now.** Often the single best black-box accelerator for factorially divergent series — the textbook Stieltjes-series accelerator.
 
-**Sketch.** Same module as Levin (`src/levin.jl`); near-trivial once A2 lands.
+**Sketch.** Same module as Levin (`src/levin.jl`); near-trivial once A1 lands.
 
-**Reuses.** A2 infrastructure.
+**Reuses.** A1 infrastructure.
 **API tag.** `Weniger(n; β)`.
 
-### A4 — Brezinski θ-algorithm  · *Small*
+### A3 — Brezinski θ-algorithm  · *Small*
 
 **Goal.** ε-algorithm variant that avoids the breakdown of Wynn's ε on irregular sequences.
 Recursion mixes 4 tableau entries.
 
-**Why now.** Useful when Wynn ε divides by zero; complements A1.
+**Why now.** Useful when Wynn ε divides by zero; complements [`wynn_eps`](https://github.com/schenkse/Resurgence.jl/blob/main/src/series_acceleration.jl).
 
 **Sketch.** New `theta_brezinski(a, n; depth)` in [src/series_acceleration.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/series_acceleration.jl).
 
 **Reuses.** Same partial-sum prelude as A1.
 **API tag.** `BrezinskiTheta(n; depth)`.
 
-### A5 — Brezinski ρ-algorithm  · *Small*
+### A4 — Brezinski ρ-algorithm  · *Small*
 
 **Goal.** Like ε but with `(k+1)` numerator, tuned for logarithmically convergent sequences.
 
 **Why now.** Companion to Richardson when partial sums decay like `1/n^p` with non-integer p.
 
-**Sketch.** Sibling function to A4 in [src/series_acceleration.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/series_acceleration.jl).
+**Sketch.** Sibling function to A3 in [src/series_acceleration.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/series_acceleration.jl).
 
-**Reuses.** Same scaffolding as A4.
+**Reuses.** Same scaffolding as A3.
 **API tag.** `BrezinskiRho(n; depth)`.
 
-### A6 — Aitken–Steffensen for fixed points  · *Small*
+### A5 — Aitken–Steffensen for fixed points  · *Small*
 
 **Goal.** `x_{k+1} = g(x_k) − (g(x_k)−x_k)²/(g(g(x_k)) − 2g(x_k) + x_k)`.
 
@@ -100,7 +86,7 @@ Recursion mixes 4 tableau entries.
 **Reuses.** Standalone — no shared scaffolding.
 **API tag.** None (function-style entry point only).
 
-### A7 — Sidi S-transformation (W-algorithm)  · *Small*
+### A6 — Sidi S-transformation (W-algorithm)  · *Small*
 
 **Goal.** Levin-style transformation for oscillatory integrands; W-algorithm gives an efficient recursion.
 
@@ -108,10 +94,10 @@ Recursion mixes 4 tableau entries.
 
 **Sketch.** Append to `src/levin.jl`.
 
-**Reuses.** A2 infrastructure.
+**Reuses.** A1 infrastructure.
 **API tag.** `SidiS(n; …)`.
 
-### A8 — Cesàro/Abel summation  · *Small*
+### A7 — Cesàro/Abel summation  · *Small*
 
 **Goal.** `cesaro(a, n)` and `abel(a; x)` (radial limit `lim_{x→1⁻} Σ aₖ xᵏ`).
 

@@ -130,3 +130,60 @@ function _richardson_iter(a::AbstractVector{T}, n::Integer, depth::Integer) wher
     end
     return cur[1]
 end
+
+"""
+    wynn_eps(a, n; depth = 1)
+
+Apply the Wynn ε-algorithm to the partial sums of `a` and return the entry at
+even column `2·depth` of the ε-tableau.
+
+`a[k]` is the k-th term of the series; with partial sums `Aⱼ = sum(a[1:j])`,
+the recursion is
+
+    ε^{(n)}_{-1} = 0,    ε^{(n)}_0 = Aₙ,
+    ε^{(n)}_{k+1} = ε^{(n+1)}_{k-1} + 1 / (ε^{(n+1)}_k − ε^{(n)}_k).
+
+The even-column entries are the meaningful approximants; the odd columns are
+auxiliary. Column `2·depth` realises the `depth`-th-order Shanks transform via
+its determinantal form. At `depth = 1` this is one Aitken-Δ² step and matches
+[`shanks`](@ref)`(a, n; depth = 1)` exactly; at higher `depth` it differs
+entry-by-entry from iterated [`shanks`](@ref) (which iterates the Δ² operator)
+but shares the same limit, and is typically better conditioned.
+
+When two consecutive column-`k` entries coincide (the sequence has effectively
+converged at that position), the recursion would divide by zero; the
+implementation returns that entry instead of `NaN`/`Inf`.
+"""
+function wynn_eps(a::AbstractVector{T}, n::Integer; depth::Integer = 1) where {T<:Number}
+    depth ≥ 1 || throw(ArgumentError("depth must be ≥ 1"))
+    n ≥ 2 || throw(ArgumentError("n must be ≥ 2"))
+    N = n + depth
+    N ≤ length(a) || throw(ArgumentError("need length(a) ≥ n+depth = $N, got $(length(a))"))
+    S = Vector{T}(undef, N)
+    acc = zero(T)
+    @inbounds for k in 1:N
+        acc += a[k]
+        S[k] = acc
+    end
+    return _wynn_eps_iter(S, depth)
+end
+
+function _wynn_eps_iter(S::AbstractVector{T}, depth::Integer) where {T<:Number}
+    N = length(S)
+    N ≥ 2 * depth + 1 || throw(ArgumentError("not enough partial sums to reach ε column $(2*depth)"))
+    # Column -1 is identically zero; pad to length N so col_prev2[j+1] is valid.
+    col_prev2 = zeros(T, N)
+    col_prev  = collect(S)
+    for _ in 1:(2 * depth)
+        L = length(col_prev) - 1
+        nxt = Vector{T}(undef, L)
+        @inbounds for j in 1:L
+            d = col_prev[j+1] - col_prev[j]
+            iszero(d) && return col_prev[j+1]
+            nxt[j] = col_prev2[j+1] + inv(d)
+        end
+        col_prev2 = col_prev
+        col_prev  = nxt
+    end
+    return last(col_prev)
+end

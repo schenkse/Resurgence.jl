@@ -6,6 +6,7 @@ using Resurgence
     include("test_poles.jl")
     include("test_shanks.jl")
     include("test_richardson.jl")
+    include("test_wynn_eps.jl")
     include("test_pade.jl")
     include("test_pade_cf.jl")
     include("test_pade_hermite.jl")

@@ -23,7 +23,7 @@ include("stokes.jl")
 include("api.jl")
 
 # functional API
-export shanks, richardson
+export shanks, richardson, wynn_eps
 export pade, pade_value
 export pade_cf, pade_cf_value
 export hermite_pade, hermite_pade_value
@@ -38,7 +38,7 @@ export stokes_action, stokes_exponent, stokes_constant, stokes_fit
 export chop!, sparsify!
 
 # unified API
-export AbstractResummation, Shanks, Richardson, Pade, PadeCF, HermitePade,
+export AbstractResummation, Shanks, Richardson, WynnEps, Pade, PadeCF, HermitePade,
     BorelPade, BorelPadeLateral, BorelPadeMedian,
     BorelLeRoyPade, ConformalBorelPade, MeijerG
 export resum

@@ -39,6 +39,18 @@ struct Richardson <: AbstractResummation
 end
 
 """
+    WynnEps(n; depth = 1)
+
+Wynn ε-algorithm tag. `resum(WynnEps(n; depth), a)` calls
+`wynn_eps(a, n; depth)`.
+"""
+struct WynnEps <: AbstractResummation
+    n::Int
+    depth::Int
+    WynnEps(n::Integer; depth::Integer = 1) = new(Int(n), Int(depth))
+end
+
+"""
     Pade(n, m; x = 1)
 
 Padé approximant tag. `resum(Pade(n, m; x), a)` calls `pade_value(a, n, m, x)`.
@@ -179,6 +191,7 @@ Apply `method` to the formal power series with coefficients `a`.
 """
 resum(s::Shanks, a) = shanks(a, s.n; depth = s.depth)
 resum(r::Richardson, a) = richardson(a, r.n; depth = r.depth)
+resum(w::WynnEps, a) = wynn_eps(a, w.n; depth = w.depth)
 resum(p::Pade, a) = pade_value(a, p.n, p.m, p.x)
 resum(p::PadeCF, a) = pade_cf_value(a, p.n, p.m, p.x)
 resum(h::HermitePade, a) = hermite_pade_value(a, h.n, h.m, h.l, h.x; branch = h.branch)

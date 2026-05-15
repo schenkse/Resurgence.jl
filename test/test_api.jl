@@ -63,6 +63,12 @@ using Resurgence
         @test resum(Shanks(5; depth = 3), a) ≈ shanks(a, 5; depth = 3)
     end
 
+    @testset "WynnEps dispatches with depth" begin
+        N = 30
+        a = Float64[4 * (-1.0)^k / (2k + 1) for k in 0:N-1]
+        @test resum(WynnEps(5; depth = 3), a) ≈ wynn_eps(a, 5; depth = 3)
+    end
+
     @testset "Richardson dispatches with depth" begin
         a = Float64[1 / k^2 for k in 1:30]
         @test resum(Richardson(10; depth = 3), a) ≈ richardson(a, 10; depth = 3)
