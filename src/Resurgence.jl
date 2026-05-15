@@ -34,7 +34,8 @@ export pade_cf, pade_cf_value
 export hermite_pade, hermite_pade_value
 export borel_transform, borel_leroy_transform, borel_ratios
 export conformal_map, inverse_conformal_map, conformal_reseries
-export borel_pade, borel_leroy_pade, conformal_borel_pade
+export conformal_map_pair, inverse_conformal_map_pair, conformal_reseries_pair
+export borel_pade, borel_leroy_pade, conformal_borel_pade, conformal_borel_pade_pair
 export borel_pade_lateral, borel_pade_median, borel_pade_discontinuity
 export borel_leroy_pade_lateral, borel_leroy_pade_median, borel_leroy_pade_discontinuity
 export borel_meijerg
@@ -45,7 +46,7 @@ export chop!, sparsify!
 # unified API
 export AbstractResummation, Shanks, Richardson, WynnEps, Pade, PadeCF, HermitePade,
     BorelPade, BorelPadeLateral, BorelPadeMedian,
-    BorelLeRoyPade, ConformalBorelPade, MeijerG,
+    BorelLeRoyPade, ConformalBorelPade, ConformalBorelPadePair, MeijerG,
     Cesaro, Abel, Levin, Weniger, SidiS, BrezinskiTheta, BrezinskiRho,
     Hyperasymptotic
 export resum

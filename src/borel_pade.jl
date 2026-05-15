@@ -138,6 +138,42 @@ function conformal_borel_pade(a::AbstractVector{T};
 end
 
 """
+    conformal_borel_pade_pair(a; n, m, x = 1, sing = 1, return_error = false, quad_kwargs...)
+
+Conformal-Borel–Padé resummation for a complex-conjugate Borel-plane
+singularity pair at `t = ±i·sing`:
+
+1. Borel-transform `a`.
+2. Re-expand the Borel transform under the singularity-pair conformal map
+   `t = 2·sing·v / (1 - v²)` (see [`conformal_reseries_pair`](@ref)).
+3. Padé-approximate the conformal series in `v`.
+4. Map back via `v = (√(t² + sing²) − sing) / t` (numerically as
+   `v = t / (√(t² + sing²) + sing)`) and Laplace-integrate along the
+   positive real `t` axis.
+
+`sing > 0` is the assumed magnitude of the imaginary singularity pair
+(singularities at `t = ±i·sing`). PT-symmetric problems and the quartic
+anharmonic oscillator are typical use cases.
+"""
+function conformal_borel_pade_pair(a::AbstractVector{T};
+                                   n::Integer, m::Integer, x = 1,
+                                   sing::Real = 1,
+                                   return_error::Bool = false,
+                                   quad_kwargs...) where {T<:Number}
+    length(a) ≥ n + m + 1 ||
+        throw(ArgumentError("conformal_borel_pade_pair needs length(a) ≥ n+m+1 = $(n+m+1)"))
+    Ba = borel_transform(a[1:n+m+1])
+    Bv = conformal_reseries_pair(Ba, sing, n + m)
+    Bp, Bq = pade(Bv, n, m)
+    integrand = function (t)
+        v = conformal_map_pair(x * t; a = sing)
+        return Bp(v) / Bq(v) * exp(-t)
+    end
+    val, err = quadgk(integrand, 0, Inf; quad_kwargs...)
+    return return_error ? (val, err) : val
+end
+
+"""
     borel_pade_lateral(a; n, m, x = 1, side = +1, ε = nothing, kwargs...)
 
 Lateral Borel–Padé sum: shorthand for

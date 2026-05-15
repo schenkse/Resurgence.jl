@@ -178,3 +178,48 @@ end
         @test isapprox(v, complex(STIELTJES_AT_1); atol = 1e-6)
     end
 end
+
+# Driver for the singularity-pair map: B(t) = 1/(1 + t²) has Borel-plane
+# singularities at t = ±i. The corresponding formal series has
+# a_k = (-1)^{k/2} · k! for even k and 0 for odd k. Borel sum at x = 1 is
+#   ∫₀^∞ e^{-t} / (1 + t²) dt = Ci(1)·sin(1) + (π/2 − Si(1))·cos(1)
+#                              ≈ 0.621449624235664…
+# (the Cosine/Sine integral identity).
+const PAIR_SUM_AT_1 = 0.6214496242356648
+
+pair_coeffs(::Type{T}, N) where {T} =
+    T[isodd(k) ? zero(T) : T((-1)^(k ÷ 2)) * T(factorial(big(k))) for k in 0:N-1]
+
+@testset "conformal_borel_pade_pair — ±i singularities" begin
+    @testset "Float64 reproduces the closed-form Borel sum" begin
+        a = pair_coeffs(Float64, 25)
+        v = conformal_borel_pade_pair(a; n = 10, m = 10, x = 1, sing = 1)
+        @test isapprox(v, PAIR_SUM_AT_1; atol = 1e-6)
+    end
+
+    @testset "BigFloat sharpens the answer" begin
+        a = pair_coeffs(BigFloat, 41)
+        v = conformal_borel_pade_pair(a; n = 20, m = 20, x = BigFloat(1), sing = 1)
+        @test abs(v - BigFloat(PAIR_SUM_AT_1)) < BigFloat("1e-10")
+    end
+
+    @testset "return_error returns a tuple" begin
+        a = pair_coeffs(Float64, 25)
+        v, err = conformal_borel_pade_pair(a; n = 10, m = 10, x = 1, sing = 1,
+                                           return_error = true)
+        @test err ≥ 0
+        @test isapprox(v, PAIR_SUM_AT_1; atol = max(err * 10, 1e-6))
+    end
+
+    @testset "ComplexF64 coefficients" begin
+        a = ComplexF64.(pair_coeffs(Float64, 25))
+        v = conformal_borel_pade_pair(a; n = 10, m = 10, x = ComplexF64(1), sing = 1)
+        @test v isa Complex
+        @test isapprox(v, complex(PAIR_SUM_AT_1); atol = 1e-6)
+    end
+
+    @testset "argument validation" begin
+        a = pair_coeffs(Float64, 5)
+        @test_throws ArgumentError conformal_borel_pade_pair(a; n = 5, m = 5, x = 1)
+    end
+end

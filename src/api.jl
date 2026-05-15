@@ -195,6 +195,23 @@ struct ConformalBorelPade{X,S,K} <: AbstractResummation
 end
 
 """
+    ConformalBorelPadePair(n, m; x = 1, sing = 1, kwargs...)
+
+Conformal-Borel–Padé tag for a complex-conjugate Borel singularity pair at
+`t = ±i·sing`. `resum(ConformalBorelPadePair(n, m; x, sing, kwargs...), a)`
+calls `conformal_borel_pade_pair(a; n, m, x, sing, kwargs...)`.
+"""
+struct ConformalBorelPadePair{X,S,K} <: AbstractResummation
+    n::Int
+    m::Int
+    x::X
+    sing::S
+    kwargs::K
+    ConformalBorelPadePair(n::Integer, m::Integer; x = 1, sing::Real = 1, kwargs...) =
+        new{typeof(x),typeof(sing),typeof(kwargs)}(Int(n), Int(m), x, sing, kwargs)
+end
+
+"""
     MeijerG(n; x = 1, kwargs...)
 
 Meijer-G resummation tag. `resum(MeijerG(n; x, kwargs...), a)` calls
@@ -322,6 +339,8 @@ resum(bl::BorelLeRoyPade, a) =
     borel_leroy_pade(a; n = bl.n, m = bl.m, b = bl.b, x = bl.x, bl.kwargs...)
 resum(cb::ConformalBorelPade, a) =
     conformal_borel_pade(a; n = cb.n, m = cb.m, x = cb.x, sing = cb.sing, cb.kwargs...)
+resum(cb::ConformalBorelPadePair, a) =
+    conformal_borel_pade_pair(a; n = cb.n, m = cb.m, x = cb.x, sing = cb.sing, cb.kwargs...)
 resum(mg::MeijerG, a) = borel_meijerg(a; n = mg.n, x = mg.x, mg.kwargs...)
 resum(c::Cesaro, a) = cesaro(a, c.n; depth = c.depth)
 resum(ab::Abel, a) = abel(a; x = ab.x)

@@ -93,3 +93,86 @@ function _mul_trunc(p::AbstractVector{T}, q::AbstractVector{T}, N::Integer) wher
     end
     return out
 end
+
+# Conformal map for a complex-conjugate singularity pair at t = ±i·a
+# (a > 0). The map
+#
+#     v(t) = t / (√(t² + a²) + a),    t(v) = 2 a v / (1 - v²)
+#
+# is the 1-to-1 conformal map of the cut t-plane (cuts emanating from
+# ±i·a out to ±i·∞) to the open unit disk in v. The singularities at
+# t = ±i·a map to v = ±i on the boundary; t = ±∞ maps to v = ±1. The
+# forward form is rationalised so that v(0) = 0 is hit cleanly without
+# a 0/0.
+#
+# Used for Borel transforms whose nearest singularities sit at ±i·a — a
+# common situation in PT-symmetric problems and the quartic anharmonic
+# oscillator. Re-expanding B(t) as B(t(v)) and Padé-approximating in v
+# enlarges the domain of convergence past the imaginary singularities.
+
+"""
+    conformal_map_pair(t; a = 1)
+
+Forward conformal map `v(t) = t / (√(t² + a²) + a)` for a complex-conjugate
+Borel-plane singularity pair at `t = ±i·a` (`a > 0`). Maps the cut t-plane
+to the open unit disk in `v`; the singularities at `t = ±i·a` map to
+`v = ±i` on the unit circle, and `t = ±∞` map to `v = ±1`.
+
+For real `t` the result is real (the map is regular on the real axis); for
+complex `t`, the principal-branch square root is used.
+"""
+function conformal_map_pair(t::Real; a::Real = 1)
+    a > 0 || throw(ArgumentError("a must be positive (got $a)"))
+    return t / (sqrt(t^2 + a^2) + a)
+end
+
+function conformal_map_pair(t::Number; a::Real = 1)
+    a > 0 || throw(ArgumentError("a must be positive (got $a)"))
+    return t / (sqrt(t^2 + a^2) + a)
+end
+
+"""
+    inverse_conformal_map_pair(v; a = 1)
+
+Inverse conformal map `t(v) = 2 a v / (1 - v²)` for the singularity-pair
+map. Analytic on `|v| < 1`.
+"""
+function inverse_conformal_map_pair(v::Number; a::Real = 1)
+    a > 0 || throw(ArgumentError("a must be positive (got $a)"))
+    return 2 * a * v / (1 - v^2)
+end
+
+"""
+    conformal_reseries_pair(b, a, N) -> Vector
+
+Re-expand the Borel-plane series with coefficients `b` (constant term
+first) under the singularity-pair conformal substitution
+`t = 2 a v / (1 - v²)`, producing a vector of `N + 1` coefficients in `v`.
+
+Identical structure to [`conformal_reseries`](@ref); only the polynomial
+of `t(v)` truncated to order `N` differs. Power-series composition,
+truncated at every step, so the high-order discarded coefficients never
+materialise.
+"""
+function conformal_reseries_pair(b::AbstractVector{T}, a::Real, N::Integer) where {T<:Number}
+    N ≥ 0 || throw(ArgumentError("N must be non-negative"))
+    aT = T(a)
+    # t(v) = 2a · v · (1 + v² + v⁴ + …); truncated coefficients are
+    # nonzero only at odd positions.
+    tv = zeros(T, N + 1)
+    @inbounds for k in 0:2:N-1
+        tv[k+2] = T(2) * aT
+    end
+
+    out = zeros(T, N + 1)
+    out[1] = b[1]
+    pow = zeros(T, N + 1); pow[1] = one(T)
+    @inbounds for k in 1:length(b)-1
+        pow = _mul_trunc(pow, tv, N)
+        bk = b[k+1]
+        for i in eachindex(pow)
+            out[i] += bk * pow[i]
+        end
+    end
+    return out
+end
