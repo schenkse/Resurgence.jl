@@ -179,6 +179,24 @@ struct BorelLeRoyPade{X,B,K} <: AbstractResummation
 end
 
 """
+    BorelLeRoyPadeODM(n, m; x = 1, b_grid = range(-0.4, 0.4; length = 17), kwargs...)
+
+Order-dependent-mapping Borel–Le Roy–Padé tag.
+`resum(BorelLeRoyPadeODM(n, m; x, b_grid, kwargs...), a)` calls
+`borel_leroy_pade_odm(a; n, m, x, b_grid, kwargs...)`.
+"""
+struct BorelLeRoyPadeODM{X,G,K} <: AbstractResummation
+    n::Int
+    m::Int
+    x::X
+    b_grid::G
+    kwargs::K
+    BorelLeRoyPadeODM(n::Integer, m::Integer; x = 1,
+                      b_grid = range(-0.4, 0.4; length = 17), kwargs...) =
+        new{typeof(x),typeof(b_grid),typeof(kwargs)}(Int(n), Int(m), x, b_grid, kwargs)
+end
+
+"""
     ConformalBorelPade(n, m; x = 1, sing = 1, kwargs...)
 
 Conformal-Borel–Padé tag. `resum(ConformalBorelPade(n, m; x, sing, kwargs...), a)`
@@ -337,6 +355,8 @@ resum(bp::BorelPadeMedian, a) =
     borel_pade_median(a; n = bp.n, m = bp.m, x = bp.x, bp.kwargs...)
 resum(bl::BorelLeRoyPade, a) =
     borel_leroy_pade(a; n = bl.n, m = bl.m, b = bl.b, x = bl.x, bl.kwargs...)
+resum(o::BorelLeRoyPadeODM, a) =
+    borel_leroy_pade_odm(a; n = o.n, m = o.m, x = o.x, b_grid = o.b_grid, o.kwargs...)
 resum(cb::ConformalBorelPade, a) =
     conformal_borel_pade(a; n = cb.n, m = cb.m, x = cb.x, sing = cb.sing, cb.kwargs...)
 resum(cb::ConformalBorelPadePair, a) =

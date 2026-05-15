@@ -38,6 +38,7 @@ export conformal_map_pair, inverse_conformal_map_pair, conformal_reseries_pair
 export borel_pade, borel_leroy_pade, conformal_borel_pade, conformal_borel_pade_pair
 export borel_pade_lateral, borel_pade_median, borel_pade_discontinuity
 export borel_leroy_pade_lateral, borel_leroy_pade_median, borel_leroy_pade_discontinuity
+export borel_leroy_pade_odm
 export borel_meijerg
 export optimal_truncation, superasymptotic_remainder, terminant, hyperasymptotic
 export stokes_action, stokes_exponent, stokes_constant, stokes_fit
@@ -46,7 +47,7 @@ export chop!, sparsify!
 # unified API
 export AbstractResummation, Shanks, Richardson, WynnEps, Pade, PadeCF, HermitePade,
     BorelPade, BorelPadeLateral, BorelPadeMedian,
-    BorelLeRoyPade, ConformalBorelPade, ConformalBorelPadePair, MeijerG,
+    BorelLeRoyPade, BorelLeRoyPadeODM, ConformalBorelPade, ConformalBorelPadePair, MeijerG,
     Cesaro, Abel, Levin, Weniger, SidiS, BrezinskiTheta, BrezinskiRho,
     Hyperasymptotic
 export resum

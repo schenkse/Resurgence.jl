@@ -288,3 +288,66 @@ function borel_leroy_pade_discontinuity(a::AbstractVector;
                                   side = -1, ε = ε, kwargs...)
     return (Lp - Lm) / (2 * im)
 end
+
+"""
+    borel_leroy_pade_odm(a; n, m, x = 1, b_grid = range(-0.4, 0.4; length = 17),
+                         return_b = false, kwargs...)
+
+Order-dependent-mapping (ODM) Borel–Le Roy–Padé sum: sweep the Le Roy
+parameter `b` over `b_grid`, locate the stationary point of the
+resummation result vs. `b`, and return the value there. Variational
+selection of `b` à la Bender–Boettcher: `b` is treated as a tunable
+parameter that the result should depend on weakly.
+
+The "stationary point" is the interior grid index that minimises the
+forward-difference quotient `|Δresult / Δb|`; ties are broken by
+`|Δ²result / Δb²|` (flattest). With `return_b = true`, returns a
+`(value, b_star)` tuple; otherwise just the value.
+
+`b_grid` must have at least three points so that a meaningful difference
+quotient can be formed. The default range stays well inside `(-1, 0)`,
+where the Borel–Le Roy weight is regular and `Γ(k+1+b)` has no integer
+poles.
+
+`kwargs...` are forwarded to [`borel_leroy_pade`](@ref) (e.g. `rtol`,
+`atol` for the integration).
+"""
+function borel_leroy_pade_odm(a::AbstractVector;
+                              n::Integer, m::Integer, x = 1,
+                              b_grid = range(-0.4, 0.4; length = 17),
+                              return_b::Bool = false,
+                              kwargs...)
+    length(b_grid) ≥ 3 ||
+        throw(ArgumentError("borel_leroy_pade_odm needs length(b_grid) ≥ 3 (got $(length(b_grid)))"))
+    bs = collect(b_grid)
+    vals = [borel_leroy_pade(a; n = n, m = m, b = b, x = x, kwargs...) for b in bs]
+    bstar, vstar = _odm_stationary(bs, vals)
+    return return_b ? (vstar, bstar) : vstar
+end
+
+# Pick the interior grid index minimising |Δvalue/Δparam|; ties broken by
+# the smaller |Δ²value/Δparam²| (flattest).
+function _odm_stationary(params::AbstractVector, vals::AbstractVector)
+    length(params) == length(vals) ||
+        throw(ArgumentError("params and vals must have the same length"))
+    N = length(params)
+    N ≥ 3 || throw(ArgumentError("need ≥ 3 points (got $N)"))
+    # Forward first differences along the interior of the grid.
+    bestidx = 0
+    bestdv = Inf
+    bestcurv = Inf
+    @inbounds for i in 2:N-1
+        dp_fwd = params[i+1] - params[i]
+        dp_bwd = params[i] - params[i-1]
+        # central first difference (matches forward at uniform spacing).
+        dv = abs((vals[i+1] - vals[i-1]) / (params[i+1] - params[i-1]))
+        # central second difference for tie-break.
+        d2v = abs((vals[i+1] - 2 * vals[i] + vals[i-1]) / (dp_fwd * dp_bwd))
+        if dv < bestdv || (dv == bestdv && d2v < bestcurv)
+            bestdv = dv
+            bestcurv = d2v
+            bestidx = i
+        end
+    end
+    return params[bestidx], vals[bestidx]
+end

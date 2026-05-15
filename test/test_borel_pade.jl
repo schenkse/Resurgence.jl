@@ -164,6 +164,48 @@ end
     end
 end
 
+@testset "borel_leroy_pade_odm — Stieltjes series" begin
+    @testset "_odm_stationary recovers a parabola apex" begin
+        bs = collect(range(-1.0, 1.0; length = 21))
+        vals = [(b - 0.2)^2 for b in bs]
+        b_star, v_star = Resurgence._odm_stationary(bs, vals)
+        @test isapprox(b_star, 0.2; atol = 0.1)   # within one grid spacing
+        @test v_star ≈ (b_star - 0.2)^2
+    end
+
+    @testset "ODM beats fixed b on Stieltjes" begin
+        a = Float64.(stieltjes_coeffs(BigFloat, 25))
+        v_odm = borel_leroy_pade_odm(a; n = 10, m = 10, x = 1)
+        # Default fixed-b borel_leroy_pade isn't very accurate for Stieltjes;
+        # ODM should land closer to the true Borel sum.
+        v_fixed = borel_leroy_pade(a; n = 10, m = 10, x = 1)
+        @test abs(v_odm - STIELTJES_AT_1) < abs(v_fixed - STIELTJES_AT_1)
+        @test isapprox(v_odm, STIELTJES_AT_1; atol = 1e-3)
+    end
+
+    @testset "return_b returns (value, b_star)" begin
+        a = Float64.(stieltjes_coeffs(BigFloat, 25))
+        v, b_star = borel_leroy_pade_odm(a; n = 10, m = 10, x = 1, return_b = true)
+        @test isapprox(v, STIELTJES_AT_1; atol = 1e-3)
+        @test -0.4 ≤ b_star ≤ 0.4
+    end
+
+    @testset "b_grid with fewer than 3 points errors" begin
+        a = Float64.(stieltjes_coeffs(BigFloat, 25))
+        @test_throws ArgumentError borel_leroy_pade_odm(a; n = 10, m = 10,
+                                                        x = 1, b_grid = [0.0])
+        @test_throws ArgumentError borel_leroy_pade_odm(a; n = 10, m = 10,
+                                                        x = 1, b_grid = [0.0, 0.1])
+    end
+
+    @testset "API tag dispatches" begin
+        a = Float64.(stieltjes_coeffs(BigFloat, 25))
+        v_func = borel_leroy_pade_odm(a; n = 10, m = 10, x = 1)
+        v_api = resum(BorelLeRoyPadeODM(10, 10), a)
+        @test v_func ≈ v_api
+    end
+end
+
 @testset "conformal_borel_pade — Stieltjes series" begin
     @testset "Borel singularity at t=-1 ⇒ sing=1 works well" begin
         a = Float64.(stieltjes_coeffs(BigFloat, 25))
