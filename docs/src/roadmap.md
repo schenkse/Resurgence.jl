@@ -1,19 +1,17 @@
 # Roadmap
 
-Resurgence.jl ships a working classical-resummation toolkit: Shanks, Wynn-ε, Richardson, Cesàro/Abel, Levin u/t/v, Weniger δ, Brezinski θ/ρ, Aitken–Steffensen, and Sidi S sequence accelerators; Padé and Borel/Borel–Le Roy/(single-singularity) conformal Borel–Padé; Meijer-G via the Slater-collapse onto `pFq`; optimal truncation; and lateral/median/discontinuity Borel–Padé with Stokes/large-order diagnostics on top.
+Resurgence.jl ships a working classical-resummation toolkit: Shanks, Wynn-ε, Richardson, Cesàro/Abel, Levin u/t/v, Weniger δ, Brezinski θ/ρ, Aitken–Steffensen, and Sidi S sequence accelerators; Padé and Borel/Borel–Le Roy/(single-singularity) conformal Borel–Padé; Meijer-G via the Slater-collapse onto `pFq`; optimal truncation; lateral/median/discontinuity Borel–Padé with Stokes/large-order diagnostics on top; and first-class trans-series (sectors, arithmetic, and per-sector resummation through the unified `resum` surface).
 
-The remaining gaps are on the resurgence-specific side: first-class trans-series, hyperasymptotic remainders, multi-singularity conformal maps, and order-dependent mapping.
+The remaining gaps are on the resurgence-specific side: hyperasymptotic remainders, multi-singularity conformal maps, and order-dependent mapping.
 This page is a working list of those items, sized and sketched enough to start a focused implementation task.
 
 ## Status at a glance
 
 | ID  | Technique                                | Section            | Size | Status  |
 | --- | ---------------------------------------- | ------------------ | ---- | ------- |
-| B1  | Trans-series type and arithmetic         | Borel/resurgence | L    | Planned |
-| B2  | Per-sector trans-series resummation      | Borel/resurgence | S    | Planned |
-| B3  | Hyperasymptotic remainders               | Borel/resurgence | M    | Planned |
-| B4  | Multi-singularity conformal map          | Borel/resurgence | M    | Planned |
-| B5  | Order-dependent mapping (ODM)            | Borel/resurgence | M    | Planned |
+| B1  | Hyperasymptotic remainders               | Borel/resurgence | M    | Planned |
+| B2  | Multi-singularity conformal map          | Borel/resurgence | M    | Planned |
+| B3  | Order-dependent mapping (ODM)            | Borel/resurgence | M    | Planned |
 
 Sizes: **S** ≤ ~50 LOC, **M** ≤ ~300 LOC, **L** = needs design.
 
@@ -21,35 +19,7 @@ Per-item entries below use the same fixed layout — **Goal**, **Why now**, **Sk
 
 ## B. Borel side/resurgence-specific (core)
 
-### B1 — Trans-series type and arithmetic  · *Large*
-
-**Goal.** A `TransSeries{T}` representing `Σⱼ e^{−Sⱼ/g} g^{βⱼ} (Σₖ aⱼₖ gᵏ)`.
-Stores a vector of `Sector{T}` records `(S, β, a::Vector{T})`.
-Arithmetic: addition (concat sectors, merge equal `(S,β)`), scalar multiplication, multiplication (Cauchy product per sector + cross-sector convolution), and a `transseries_exp` for the canonical `exp(small)` build-up.
-
-**Why now.** Resurgence is fundamentally trans-series, not series.
-Even without alien calculus, having a first-class type lets users define and resum non-perturbative completions (instanton + perturbative + …).
-
-**Sketch.** New `src/transseries.jl`.
-Keep ops minimal (add, scale, mul); avoid premature alien-derivative scope.
-
-**Reuses.** Nothing internally, but `resum(::TransSeries, g)` (B2) builds on the existing per-sector resummers.
-**API tag.** `TransSeries`, `Sector`, `+`, `*`, `transseries_exp`.
-
-### B2 — Per-sector trans-series resummation  · *Small* (after B1)
-
-**Goal.** `resum_transseries(ts::TransSeries, g; method=BorelPade(...))` resums each sector's perturbative series with `method`, multiplies by `e^{−Sⱼ/g} g^{βⱼ}`, and sums.
-
-**Why now.** The point of the type.
-Enables one-line "instanton-completed" answers.
-
-**Sketch.** Appended to `src/transseries.jl`.
-Loop over sectors, dispatch through the existing `resum(::AbstractResummation, ...)`.
-
-**Reuses.** [src/api.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/api.jl) entire dispatch surface.
-**API tag.** Standalone function; no new struct.
-
-### B3 — Hyperasymptotic remainders (Berry–Howls/Costin)  · *Medium*
+### B1 — Hyperasymptotic remainders (Berry–Howls/Costin)  · *Medium*
 
 **Goal.** Extend [src/truncation.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/truncation.jl) `superasymptotic_remainder` by adding terminant-function corrections that incorporate the leading instanton contribution: error scales like `e^{−2|S|/g}` instead of `e^{−|S|/g}`.
 Iteratively, hyperasymptotic level `k` gives error `e^{−(k+1)|S|/g}`.
@@ -63,7 +33,7 @@ If `action` not provided, derive it from the existing Stokes-fit utilities.
 **Reuses.** [src/truncation.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/truncation.jl), `SpecialFunctions.gamma_inc`, existing Stokes diagnostics for `S` extraction.
 **API tag.** `Hyperasymptotic(x; level, action)`.
 
-### B4 — Multi-singularity conformal map  · *Medium*
+### B2 — Multi-singularity conformal map  · *Medium*
 
 **Goal.** Generalise [src/conformal.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/conformal.jl) `conformal_map` from a single negative-real singularity at `t = −sing` to a finite set of complex singularities `{tⱼ}`.
 Two flavours: (i) symmetric pair `±i·sing` (common in problems with complex-conjugate singularity pairs — quartic anharmonic oscillator, etc.); (ii) generic uniformizing map for arbitrary `{tⱼ}` via Schwarz–Christoffel-style construction.
@@ -80,7 +50,7 @@ The current single-pole assumption silently mis-treats these.
 **Reuses.** [src/conformal.jl](https://github.com/schenkse/Resurgence.jl/blob/main/src/conformal.jl) `conformal_reseries` (the re-expansion bookkeeping is reusable; only the map changes).
 **API tag.** `ConformalBorelPadePair(...)`.
 
-### B5 — Order-dependent mapping (ODM)/variational Bender–Boettcher  · *Medium*
+### B3 — Order-dependent mapping (ODM)/variational Bender–Boettcher  · *Medium*
 
 **Goal.** Treat the conformal-map exponent (or Le Roy `b`) as a variational parameter and choose it order-by-order to minimise sensitivity (`d/db = 0`).
 
