@@ -57,4 +57,45 @@ using Resurgence
         @test :shanks in d.recommended
     end
 
+    @testset "compare: two methods with reference" begin
+        a = Float64[(-1.0)^k * Float64(factorial(big(k))) for k in 0:24]
+        ref = 0.5963473623231940
+        rows = compare([BorelPade(10, 10), Pade(10, 10)], a; reference = ref)
+        @test length(rows) == 2
+        @test rows[1].method == "BorelPade"
+        @test rows[2].method == "Pade"
+        for r in rows
+            @test r.result !== missing
+            @test r.residual < 1.0          # both at least in the ballpark
+            @test r.error === nothing
+        end
+        # Borel-Padé should be dramatically better than plain Padé on Stieltjes
+        @test rows[1].residual < rows[2].residual
+    end
+
+    @testset "compare: failing tag is caught, others survive" begin
+        a = Float64[(-1.0)^k * Float64(factorial(big(k))) for k in 0:24]
+        # Pade(50, 50) needs length(a) ≥ 101; it will throw ArgumentError.
+        rows = compare([BorelPade(10, 10), Pade(50, 50)], a; reference = 0.596)
+        @test rows[1].result !== missing
+        @test rows[1].error === nothing
+        @test rows[2].result === missing
+        @test rows[2].error isa String
+        @test !isempty(rows[2].error)
+        @test rows[2].residual === missing
+    end
+
+    @testset "compare: no reference → residual missing" begin
+        a = Float64[(-1.0)^k * Float64(factorial(big(k))) for k in 0:24]
+        rows = compare([BorelPade(10, 10)], a)
+        @test rows[1].residual === missing
+        @test rows[1].result !== missing
+    end
+
+    @testset "compare: accepts tuples" begin
+        a = Float64[(-1.0)^k * Float64(factorial(big(k))) for k in 0:24]
+        rows = compare((BorelPade(10, 10), Pade(10, 10)), a)
+        @test length(rows) == 2
+    end
+
 end

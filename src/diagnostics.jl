@@ -107,3 +107,48 @@ function _recommend(growth::Symbol, alternating::Bool)
         return [:optimal_truncation, :stokes_fit]
     end
 end
+
+"""
+    compare(methods, a; reference = nothing) -> Vector{NamedTuple}
+
+Run each `method` in `methods` via [`resum`](@ref) and tabulate the results.
+`methods` is any iterable of [`AbstractResummation`](@ref) tags (vector,
+tuple, generator, …).
+
+Each row is a `NamedTuple`:
+
+- `method::String`  — the tag's type name (e.g. `"BorelPade"`).
+- `result`          — `resum(method, a)` or `missing` on failure.
+- `residual`        — `abs(result - reference)` if `reference` is supplied
+                      and the call succeeded, else `missing`.
+- `error`           — `nothing` on success, an error-message `String` on
+                      failure.
+
+Per-method failures are caught and recorded so that one bad tag (e.g. a
+singular Padé fit or a `length(a) < n+m+1` mismatch) doesn't abort the
+survey.
+
+# Example
+
+```julia
+rows = compare([BorelPade(10, 10), Pade(10, 10)], a; reference = 0.5963473623)
+```
+"""
+function compare(methods, a; reference = nothing)
+    rows = NamedTuple[]
+    for m in methods
+        label = string(nameof(typeof(m)))
+        result = missing
+        err = nothing
+        try
+            result = resum(m, a)
+        catch e
+            err = sprint(showerror, e)
+        end
+        residual = (reference === nothing || result === missing) ?
+                   missing : abs(result - reference)
+        push!(rows, (method = label, result = result,
+                     residual = residual, error = err))
+    end
+    return rows
+end
