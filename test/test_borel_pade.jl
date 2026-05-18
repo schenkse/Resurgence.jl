@@ -173,6 +173,23 @@ end
         @test v_star ≈ (b_star - 0.2)^2
     end
 
+    @testset "_odm_stationary stays interior when stationary point is at boundary" begin
+        # The minimum of a strictly monotone series sits at one of the grid
+        # ends, but `_odm_stationary` only searches `2:N-1`; the test pins down
+        # the boundary behaviour:
+        #   - the returned `b_star` is always interior,
+        #   - it lands near the end that hosts the actual minimum (rather
+        #     than the middle of the grid).
+        # FP-induced asymmetry in the tie-break decides exactly which interior
+        # index, so we assert "near the left end" rather than a specific one.
+        bs = collect(range(-0.4, 0.4; length = 17))
+        vals = copy(bs)   # strictly increasing → minimum at bs[1]
+        b_star, v_star = Resurgence._odm_stationary(bs, vals)
+        @test bs[2] ≤ b_star ≤ bs[end - 1]    # always interior
+        @test b_star ≤ bs[4]                  # near the left boundary
+        @test v_star == b_star                # vals = bs identity preserved
+    end
+
     @testset "ODM beats fixed b on Stieltjes" begin
         a = Float64.(stieltjes_coeffs(BigFloat, 25))
         v_odm = borel_leroy_pade_odm(a; n = 10, m = 10, x = 1)

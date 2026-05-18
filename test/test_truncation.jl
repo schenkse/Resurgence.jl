@@ -60,6 +60,20 @@ end
         t = terminant(big"2.5", big"1.0")
         @test t isa Complex{BigFloat}
     end
+
+    @testset "σ → ∞ asymptotic of Γ(1−p, σ) through two correction terms" begin
+        # Independent of the function's own formula: cross-check the large-σ
+        # asymptotic (NIST DLMF 8.11.2),
+        #     Γ(1−p, σ) ~ σ^(−p) e^(−σ) · [1 − p/σ + p(p+1)/σ² − …],
+        # which feeds into |T_p(σ)| ~ |Γ(p)| · σ^(−p) e^(−σ) · (series) / (2π).
+        # Truncating after two correction terms leaves an O(p³/σ³) tail.
+        p = 5.5
+        for σ in (40.0, 80.0, 160.0)
+            series = 1 - p / σ + p * (p + 1) / σ^2
+            ref = abs(gamma(p)) * σ^(-p) * exp(-σ) * series / (2π)
+            @test isapprox(abs(terminant(p, σ)) / ref, 1.0; rtol = 5 * p^2 / σ^2)
+        end
+    end
 end
 
 @testset "hyperasymptotic" begin
@@ -97,6 +111,17 @@ end
         @test imag(v1) * imag(Lp) > 0           # same sign
         # within an order of magnitude
         @test 0.1 < abs(imag(v1) / imag(Lp)) < 10
+    end
+
+    @testset "level=1 imag part matches the closed-form −π·A·x^(−β)·exp(−S/x)" begin
+        # The level-1 correction is exactly -i·π·A·x^(-β)·exp(-S/x). With
+        # real partial sum and real (A, β, S), imag(v) equals this closed
+        # form to machine precision.
+        a = Float64.(factorials(BigFloat, 25))
+        x = 0.1
+        v = hyperasymptotic(a; x = x, level = 1, action = 1.0, β = 1.0, A = 1.0)
+        expected_imag = -π * 1.0 * x^(-1.0) * exp(-1.0 / x)
+        @test imag(v) ≈ expected_imag rtol = 1e-12
     end
 
     @testset "level=1 auto-extracts (action, β, A) via stokes_fit" begin

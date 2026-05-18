@@ -34,6 +34,32 @@ using Resurgence
         @test v ≈ v_direct
     end
 
+    @testset "HermitePade dispatches to hermite_pade_value (with and without branch)" begin
+        # exp(z/2) Taylor coefficients: non-degenerate driver for hermite_pade
+        # (f² = exp(z) has no polynomial relation in f).
+        N = 11
+        c = Vector{Float64}(undef, N)
+        c[1] = 1.0
+        for k in 1:N-1
+            c[k+1] = c[k] / (2k)
+        end
+        z = 0.3
+        v_default = resum(HermitePade(3, 3, 3; x = z), c)
+        @test v_default ≈ hermite_pade_value(c, 3, 3, 3, z)
+        v_plus  = resum(HermitePade(3, 3, 3; x = z, branch = +1), c)
+        v_minus = resum(HermitePade(3, 3, 3; x = z, branch = -1), c)
+        @test v_plus  ≈ hermite_pade_value(c, 3, 3, 3, z; branch = +1)
+        @test v_minus ≈ hermite_pade_value(c, 3, 3, 3, z; branch = -1)
+    end
+
+    @testset "ConformalBorelPadePair dispatches to conformal_borel_pade_pair" begin
+        # B(t) = 1/(1+t²) driver with ±i Borel singularities.
+        a = Float64[isodd(k) ? 0.0 : (-1.0)^(k ÷ 2) * Float64(factorial(big(k))) for k in 0:24]
+        v_tag = resum(ConformalBorelPadePair(10, 10; sing = 1.0), a)
+        v_direct = conformal_borel_pade_pair(a; n = 10, m = 10, x = 1, sing = 1.0)
+        @test v_tag ≈ v_direct
+    end
+
     @testset "MeijerG dispatches to borel_meijerg" begin
         # Stieltjes itself is rank-degenerate for borel_meijerg; use the
         # shifted (k+1)! variant to drive a clean rational fit.
