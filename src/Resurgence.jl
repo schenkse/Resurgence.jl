@@ -23,6 +23,7 @@ include("truncation.jl")
 include("stokes.jl")
 include("api.jl")
 include("transseries.jl")
+include("diagnostics.jl")
 
 # functional API
 export shanks, richardson, wynn_eps, cesaro, abel
@@ -54,5 +55,8 @@ export resum
 
 # trans-series
 export Sector, TransSeries, transseries_exp, resum_transseries
+
+# diagnostics
+export diagnose
 
 end # module
