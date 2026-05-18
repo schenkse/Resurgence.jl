@@ -321,7 +321,14 @@ function borel_leroy_pade_odm(a::AbstractVector;
     length(b_grid) ≥ 3 ||
         throw(ArgumentError("borel_leroy_pade_odm needs length(b_grid) ≥ 3 (got $(length(b_grid)))"))
     bs = collect(b_grid)
-    vals = [borel_leroy_pade(a; n = n, m = m, b = b, x = x, kwargs...) for b in bs]
+    # Each grid point is an independent Padé fit + quadgk; the b values share
+    # nothing reusable since the Le Roy weight Γ(k+1+b) re-scales every Borel
+    # coefficient. Spawn one task per point and gather; degenerates to
+    # sequential at JULIA_NUM_THREADS=1.
+    tasks = map(bs) do b
+        Threads.@spawn borel_leroy_pade(a; n = n, m = m, b = b, x = x, kwargs...)
+    end
+    vals = map(fetch, tasks)
     bstar, vstar = _odm_stationary(bs, vals)
     return return_b ? (vstar, bstar) : vstar
 end
