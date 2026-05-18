@@ -122,13 +122,13 @@ end
 Borel–Padé tag. `resum(BorelPade(n, m; x, kwargs...), a)` calls
 `borel_pade(a; n, m, x, kwargs...)`.
 """
-struct BorelPade{X,K} <: AbstractResummation
+struct BorelPade{X} <: AbstractResummation
     n::Int
     m::Int
     x::X
-    kwargs::K
+    kwargs::NamedTuple
     BorelPade(n::Integer, m::Integer; x = 1, kwargs...) =
-        new{typeof(x),typeof(kwargs)}(Int(n), Int(m), x, kwargs)
+        new{typeof(x)}(Int(n), Int(m), x, NamedTuple(kwargs))
 end
 
 """
@@ -137,14 +137,14 @@ end
 Lateral Borel–Padé tag. `resum(BorelPadeLateral(n, m; x, side, kwargs...), a)`
 calls `borel_pade_lateral(a; n, m, x, side, kwargs...)`.
 """
-struct BorelPadeLateral{X,K} <: AbstractResummation
+struct BorelPadeLateral{X} <: AbstractResummation
     n::Int
     m::Int
     x::X
     side::Int
-    kwargs::K
+    kwargs::NamedTuple
     BorelPadeLateral(n::Integer, m::Integer; x = 1, side::Integer = +1, kwargs...) =
-        new{typeof(x),typeof(kwargs)}(Int(n), Int(m), x, Int(side), kwargs)
+        new{typeof(x)}(Int(n), Int(m), x, Int(side), NamedTuple(kwargs))
 end
 
 """
@@ -153,13 +153,13 @@ end
 Median Borel–Padé tag. `resum(BorelPadeMedian(n, m; x, kwargs...), a)` calls
 `borel_pade_median(a; n, m, x, kwargs...)`.
 """
-struct BorelPadeMedian{X,K} <: AbstractResummation
+struct BorelPadeMedian{X} <: AbstractResummation
     n::Int
     m::Int
     x::X
-    kwargs::K
+    kwargs::NamedTuple
     BorelPadeMedian(n::Integer, m::Integer; x = 1, kwargs...) =
-        new{typeof(x),typeof(kwargs)}(Int(n), Int(m), x, kwargs)
+        new{typeof(x)}(Int(n), Int(m), x, NamedTuple(kwargs))
 end
 
 """
@@ -168,14 +168,14 @@ end
 Borel–Le Roy–Padé tag. `resum(BorelLeRoyPade(n, m; b, x, kwargs...), a)` calls
 `borel_leroy_pade(a; n, m, b, x, kwargs...)`.
 """
-struct BorelLeRoyPade{X,B,K} <: AbstractResummation
+struct BorelLeRoyPade{X,B} <: AbstractResummation
     n::Int
     m::Int
     b::B
     x::X
-    kwargs::K
+    kwargs::NamedTuple
     BorelLeRoyPade(n::Integer, m::Integer; b::Real = -1//2, x = 1, kwargs...) =
-        new{typeof(x),typeof(b),typeof(kwargs)}(Int(n), Int(m), b, x, kwargs)
+        new{typeof(x),typeof(b)}(Int(n), Int(m), b, x, NamedTuple(kwargs))
 end
 
 """
@@ -185,15 +185,15 @@ Order-dependent-mapping Borel–Le Roy–Padé tag.
 `resum(BorelLeRoyPadeODM(n, m; x, b_grid, kwargs...), a)` calls
 `borel_leroy_pade_odm(a; n, m, x, b_grid, kwargs...)`.
 """
-struct BorelLeRoyPadeODM{X,G,K} <: AbstractResummation
+struct BorelLeRoyPadeODM{X,G} <: AbstractResummation
     n::Int
     m::Int
     x::X
     b_grid::G
-    kwargs::K
+    kwargs::NamedTuple
     BorelLeRoyPadeODM(n::Integer, m::Integer; x = 1,
                       b_grid = range(-0.4, 0.4; length = 17), kwargs...) =
-        new{typeof(x),typeof(b_grid),typeof(kwargs)}(Int(n), Int(m), x, b_grid, kwargs)
+        new{typeof(x),typeof(b_grid)}(Int(n), Int(m), x, b_grid, NamedTuple(kwargs))
 end
 
 """
@@ -202,14 +202,14 @@ end
 Conformal-Borel–Padé tag. `resum(ConformalBorelPade(n, m; x, sing, kwargs...), a)`
 calls `conformal_borel_pade(a; n, m, x, sing, kwargs...)`.
 """
-struct ConformalBorelPade{X,S,K} <: AbstractResummation
+struct ConformalBorelPade{X,S} <: AbstractResummation
     n::Int
     m::Int
     x::X
     sing::S
-    kwargs::K
+    kwargs::NamedTuple
     ConformalBorelPade(n::Integer, m::Integer; x = 1, sing::Real = 1, kwargs...) =
-        new{typeof(x),typeof(sing),typeof(kwargs)}(Int(n), Int(m), x, sing, kwargs)
+        new{typeof(x),typeof(sing)}(Int(n), Int(m), x, sing, NamedTuple(kwargs))
 end
 
 """
@@ -219,14 +219,14 @@ Conformal-Borel–Padé tag for a complex-conjugate Borel singularity pair at
 `t = ±i·sing`. `resum(ConformalBorelPadePair(n, m; x, sing, kwargs...), a)`
 calls `conformal_borel_pade_pair(a; n, m, x, sing, kwargs...)`.
 """
-struct ConformalBorelPadePair{X,S,K} <: AbstractResummation
+struct ConformalBorelPadePair{X,S} <: AbstractResummation
     n::Int
     m::Int
     x::X
     sing::S
-    kwargs::K
+    kwargs::NamedTuple
     ConformalBorelPadePair(n::Integer, m::Integer; x = 1, sing::Real = 1, kwargs...) =
-        new{typeof(x),typeof(sing),typeof(kwargs)}(Int(n), Int(m), x, sing, kwargs)
+        new{typeof(x),typeof(sing)}(Int(n), Int(m), x, sing, NamedTuple(kwargs))
 end
 
 """
@@ -235,12 +235,12 @@ end
 Meijer-G resummation tag. `resum(MeijerG(n; x, kwargs...), a)` calls
 `borel_meijerg(a; n, x, kwargs...)`.
 """
-struct MeijerG{X,K} <: AbstractResummation
+struct MeijerG{X} <: AbstractResummation
     n::Int
     x::X
-    kwargs::K
+    kwargs::NamedTuple
     MeijerG(n::Integer; x = 1, kwargs...) =
-        new{typeof(x),typeof(kwargs)}(Int(n), x, kwargs)
+        new{typeof(x)}(Int(n), x, NamedTuple(kwargs))
 end
 
 """
@@ -271,16 +271,16 @@ Levin sequence-transformation tag. `resum(Levin(n; depth, variant, β), a)`
 calls `levin(a, n; depth, variant, β)`. With `depth = nothing` (default), the
 function-level default `length(a) - n - 1` is used at dispatch time.
 """
-struct Levin{B,K} <: AbstractResummation
+struct Levin{B} <: AbstractResummation
     n::Int
     depth::Union{Int,Nothing}
     variant::Symbol
     β::B
-    kwargs::K
+    kwargs::NamedTuple
     Levin(n::Integer; depth::Union{Integer,Nothing} = nothing,
           variant::Symbol = :u, β::Real = 1, kwargs...) =
-        new{typeof(β),typeof(kwargs)}(Int(n),
-            depth === nothing ? nothing : Int(depth), variant, β, kwargs)
+        new{typeof(β)}(Int(n),
+            depth === nothing ? nothing : Int(depth), variant, β, NamedTuple(kwargs))
 end
 
 """
@@ -290,15 +290,15 @@ Weniger δ-transformation tag. `resum(Weniger(n; depth, β), a)` calls
 `weniger(a, n; depth, β)`. With `depth = nothing` (default), the function-
 level default `length(a) - n - 1` is used at dispatch time.
 """
-struct Weniger{B,K} <: AbstractResummation
+struct Weniger{B} <: AbstractResummation
     n::Int
     depth::Union{Int,Nothing}
     β::B
-    kwargs::K
+    kwargs::NamedTuple
     Weniger(n::Integer; depth::Union{Integer,Nothing} = nothing,
             β::Real = 1, kwargs...) =
-        new{typeof(β),typeof(kwargs)}(Int(n),
-            depth === nothing ? nothing : Int(depth), β, kwargs)
+        new{typeof(β)}(Int(n),
+            depth === nothing ? nothing : Int(depth), β, NamedTuple(kwargs))
 end
 
 """
@@ -308,16 +308,16 @@ Sidi S-transformation tag. `resum(SidiS(n; depth, variant, β), a)` calls
 `sidi_s(a, n; depth, variant, β)`. With `depth = nothing` (default), the
 function-level default `length(a) - n - 1` is used at dispatch time.
 """
-struct SidiS{B,K} <: AbstractResummation
+struct SidiS{B} <: AbstractResummation
     n::Int
     depth::Union{Int,Nothing}
     variant::Symbol
     β::B
-    kwargs::K
+    kwargs::NamedTuple
     SidiS(n::Integer; depth::Union{Integer,Nothing} = nothing,
           variant::Symbol = :u, β::Real = 1, kwargs...) =
-        new{typeof(β),typeof(kwargs)}(Int(n),
-            depth === nothing ? nothing : Int(depth), variant, β, kwargs)
+        new{typeof(β)}(Int(n),
+            depth === nothing ? nothing : Int(depth), variant, β, NamedTuple(kwargs))
 end
 
 """
@@ -327,12 +327,12 @@ Hyperasymptotic-truncation tag. `resum(Hyperasymptotic(; x, level, kwargs...), a
 calls `hyperasymptotic(a; x, level, kwargs...)`. `kwargs` may include
 `action`, `β`, `A` to override the defaults derived from `stokes_fit`.
 """
-struct Hyperasymptotic{X,K} <: AbstractResummation
+struct Hyperasymptotic{X} <: AbstractResummation
     x::X
     level::Int
-    kwargs::K
+    kwargs::NamedTuple
     Hyperasymptotic(; x = 1, level::Integer = 1, kwargs...) =
-        new{typeof(x),typeof(kwargs)}(x, Int(level), kwargs)
+        new{typeof(x)}(x, Int(level), NamedTuple(kwargs))
 end
 
 """
