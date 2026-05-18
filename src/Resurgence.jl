@@ -33,13 +33,14 @@ export levin, weniger, sidi_s
 export pade, pade_value
 export pade_cf, pade_cf_value
 export hermite_pade, hermite_pade_value
-export borel_transform, borel_leroy_transform, borel_ratios
+export borel_transform, borel_leroy_transform, mittag_leffler_borel_transform, borel_ratios
 export conformal_map, inverse_conformal_map, conformal_reseries
 export conformal_map_pair, inverse_conformal_map_pair, conformal_reseries_pair
 export borel_pade, borel_leroy_pade, conformal_borel_pade, conformal_borel_pade_pair
 export borel_pade_lateral, borel_pade_median, borel_pade_discontinuity
 export borel_leroy_pade_lateral, borel_leroy_pade_median, borel_leroy_pade_discontinuity
 export borel_leroy_pade_odm
+export mittag_leffler_borel_pade
 export borel_meijerg
 export optimal_truncation, superasymptotic_remainder, terminant, hyperasymptotic
 export stokes_action, stokes_exponent, stokes_constant, stokes_fit
@@ -48,7 +49,8 @@ export chop!, sparsify!
 # unified API
 export AbstractResummation, Shanks, Richardson, WynnEps, Pade, PadeCF, HermitePade,
     BorelPade, BorelPadeLateral, BorelPadeMedian,
-    BorelLeRoyPade, BorelLeRoyPadeODM, ConformalBorelPade, ConformalBorelPadePair, MeijerG,
+    BorelLeRoyPade, BorelLeRoyPadeODM, MittagLefflerBorelPade,
+    ConformalBorelPade, ConformalBorelPadePair, MeijerG,
     Cesaro, Abel, Levin, Weniger, SidiS, BrezinskiTheta, BrezinskiRho,
     Hyperasymptotic
 export resum

@@ -73,4 +73,29 @@ using Resurgence
         r = borel_ratios(B)
         @test eltype(r) === ComplexF64
     end
+
+    @testset "mittag_leffler_borel_transform reduces to borel at α=1" begin
+        a = [1.0, 2.0, 4.0, 6.0, 8.0, -3.0]
+        @test mittag_leffler_borel_transform(a, 1.0) ≈ borel_transform(a)
+    end
+
+    @testset "mittag_leffler_borel_transform α=2 matches the closed form" begin
+        # a_k = (2k)! / k! → B[k] = (2k)! / (k! · (2k)!) = 1/k!  for α = 2
+        # gives a known finite expansion (the canonical super-factorial test).
+        a = Float64[Float64(factorial(big(2k))) / factorial(big(k)) for k in 0:6]
+        B = mittag_leffler_borel_transform(a, 2.0)
+        expected = Float64[1 / factorial(big(k)) for k in 0:6]
+        @test B ≈ expected rtol = 1e-12
+    end
+
+    @testset "mittag_leffler_borel_transform BigFloat preserves type" begin
+        a = BigFloat[1, 2, 4, 6, 8]
+        B = mittag_leffler_borel_transform(a, big"0.5")
+        @test eltype(B) === BigFloat
+    end
+
+    @testset "mittag_leffler_borel_transform rejects α ≤ 0" begin
+        @test_throws ArgumentError mittag_leffler_borel_transform([1.0, 2.0], 0.0)
+        @test_throws ArgumentError mittag_leffler_borel_transform([1.0, 2.0], -0.5)
+    end
 end

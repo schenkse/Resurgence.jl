@@ -1,6 +1,7 @@
 using Test
 using Resurgence
 using SpecialFunctions: expinti
+using QuadGK: quadgk
 
 unsigned_factorials(::Type{T}, N) where {T} = T[factorial(big(k)) for k in 0:N-1]
 
@@ -280,5 +281,49 @@ pair_coeffs(::Type{T}, N) where {T} =
     @testset "argument validation" begin
         a = pair_coeffs(Float64, 5)
         @test_throws ArgumentError conformal_borel_pade_pair(a; n = 5, m = 5, x = 1)
+    end
+end
+
+@testset "mittag_leffler_borel_pade" begin
+    @testset "α = 1 recovers borel_pade on Stieltjes" begin
+        a = Float64.(stieltjes_coeffs(BigFloat, 25))
+        v_ml = mittag_leffler_borel_pade(a; n = 10, m = 10, α = 1.0, x = 1)
+        v_bp = borel_pade(a; n = 10, m = 10, x = 1)
+        @test isapprox(v_ml, v_bp; atol = 1e-10)
+        @test isapprox(v_ml, STIELTJES_AT_1; atol = 1e-6)
+    end
+
+    @testset "α = 2 sums an alternating-(2k)! series" begin
+        # The series a_k = (-1)^k (2k)! has Mittag-Leffler-α=2 transform
+        # B[k] = (-1)^k, so B_α(t) = 1/(1+t). The resummation
+        #   f(x) = ∫₀^∞ 1/(1 + x·u²) · e^(-u) du
+        # has no real-axis pole and is a clean reference.
+        a = Float64[(-1.0)^k * Float64(factorial(big(2k))) for k in 0:12]
+        x = 1.0
+        v = mittag_leffler_borel_pade(a; n = 6, m = 6, α = 2.0, x = x)
+        ref, _ = quadgk(u -> 1 / (1 + x * u^2) * exp(-u), 0, Inf; rtol = 1e-12)
+        @test isapprox(real(v), ref; rtol = 1e-6)
+    end
+
+    @testset "return_error returns a tuple" begin
+        a = Float64.(stieltjes_coeffs(BigFloat, 25))
+        v, err = mittag_leffler_borel_pade(a; n = 10, m = 10, α = 1.0, x = 1,
+                                           return_error = true)
+        @test err ≥ 0
+        @test isapprox(v, STIELTJES_AT_1; atol = max(err * 10, 1e-6))
+    end
+
+    @testset "argument validation" begin
+        a = Float64.(stieltjes_coeffs(BigFloat, 5))
+        @test_throws ArgumentError mittag_leffler_borel_pade(a; n = 5, m = 5, α = 1.0)
+        @test_throws ArgumentError mittag_leffler_borel_pade(a; n = 2, m = 2, α = 0.0)
+        @test_throws ArgumentError mittag_leffler_borel_pade(a; n = 2, m = 2, α = -1.0)
+    end
+
+    @testset "MittagLefflerBorelPade API tag dispatches" begin
+        a = Float64.(stieltjes_coeffs(BigFloat, 25))
+        v_func = mittag_leffler_borel_pade(a; n = 10, m = 10, α = 1.0, x = 1)
+        v_api  = resum(MittagLefflerBorelPade(10, 10; α = 1.0, x = 1), a)
+        @test v_func ≈ v_api
     end
 end

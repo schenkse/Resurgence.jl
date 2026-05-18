@@ -105,6 +105,47 @@ function borel_leroy_pade(a::AbstractVector{T};
 end
 
 """
+    mittag_leffler_borel_pade(a; n, m, α, x = 1, return_error = false, quad_kwargs...)
+
+Mittag-Leffler / generalised-Borel–Padé resummation of order `α > 0`:
+
+1. Compute the Mittag-Leffler-Borel transform `B[k] = a[k] / Γ(α·k + 1)`
+   (see [`mittag_leffler_borel_transform`](@ref)).
+2. Replace `B(t)` by its Padé approximant `[n/m]`.
+3. Integrate against the Mittag-Leffler kernel, in the change of variable
+   `u = t^{1/α}` that linearises the exponential weight:
+
+       f(x) ≈ ∫₀^∞ (Bₚ(x·u^α) / B_q(x·u^α)) · e^{−u} du.
+
+For `α = 1` this reduces to [`borel_pade`](@ref). For `α > 1` it tolerates
+super-factorial coefficient growth (e.g. `(2k)!`) that defeats the standard
+Borel kernel; for `α < 1` it sharpens convergence on sub-factorial series.
+
+No pole-regularisation / lateral variants for v1: the `u^α` change of variable
+maps real-axis poles of the Padé denominator to fractional-power surfaces in
+`u`, which calls for separate treatment.
+
+`quad_kwargs` are forwarded to `QuadGK.quadgk` (e.g. `rtol`, `atol`, `order`).
+Requires `length(a) ≥ n + m + 1`.
+"""
+function mittag_leffler_borel_pade(a::AbstractVector{T};
+                                   n::Integer, m::Integer,
+                                   α::Real, x = 1,
+                                   return_error::Bool = false,
+                                   quad_kwargs...) where {T<:Number}
+    length(a) ≥ n + m + 1 ||
+        throw(ArgumentError("mittag_leffler_borel_pade needs length(a) ≥ n+m+1 = $(n+m+1)"))
+    α > 0 || throw(ArgumentError("mittag_leffler_borel_pade needs α > 0 (got $α)"))
+    Ba = mittag_leffler_borel_transform(a[1:n+m+1], α)
+    Bp, Bq = pade(Ba, n, m)
+
+    αR = real(T)(α)
+    integrand = u -> Bp(x * u^αR) / Bq(x * u^αR) * exp(-u)
+    val, err = quadgk(integrand, 0, Inf; quad_kwargs...)
+    return return_error ? (val, err) : val
+end
+
+"""
     conformal_borel_pade(a; n, m, x = 1, sing = 1, return_error = false, quad_kwargs...)
 
 Conformal-Borel–Padé resummation:

@@ -91,6 +91,10 @@ The variants differ in how they handle the Padé step:
   Treat the Le Roy parameter `b` as variational: sweep it over a grid, locate the stationary point of the resummation value vs. `b`, and return the value there.
   This is the Bender–Boettcher style of variational improvement, where the answer is the one that depends most weakly on the unphysical knob.
   The default grid stays inside `(−1, 0)` so the Le Roy weight `Γ(k + 1 + b)` has no integer poles.
+- [`mittag_leffler_borel_pade`](@ref) — Mittag-Leffler / generalised-Borel of order `α > 0`.
+  Divides each coefficient by `Γ(α·k + 1)` instead of `k!`, and inverts via the kernel `(1/α)·t^{(1−α)/α}·e^{−t^{1/α}}` — equivalently, integrates `∫₀^∞ B(x·u^α) · e^{−u} du`.
+  `α = 1` recovers ordinary [`borel_pade`](@ref); `α > 1` (e.g. `α = 2`) tolerates super-factorial growth like `(2k)!` that the standard Borel kernel cannot tame; `α < 1` sharpens convergence on sub-factorial drivers.
+  Distinct from the Le Roy variant: Le Roy changes the polynomial prefactor only, Mittag-Leffler changes the exponential growth rate itself.
 
 For a series whose Borel transform has a singularity on the *positive* real axis (`S < 0`), the standard Laplace integral is ill-defined.
 Use the lateral/median variants:

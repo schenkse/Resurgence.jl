@@ -179,6 +179,24 @@ struct BorelLeRoyPade{X,B} <: AbstractResummation
 end
 
 """
+    MittagLefflerBorelPade(n, m; α, x = 1, kwargs...)
+
+Mittag-Leffler / generalised-Borel–Padé tag.
+`resum(MittagLefflerBorelPade(n, m; α, x, kwargs...), a)` calls
+`mittag_leffler_borel_pade(a; n, m, α, x, kwargs...)`. `α > 0` is required and
+has no default — `α = 1` would silently duplicate [`BorelPade`](@ref).
+"""
+struct MittagLefflerBorelPade{X,A} <: AbstractResummation
+    n::Int
+    m::Int
+    α::A
+    x::X
+    kwargs::NamedTuple
+    MittagLefflerBorelPade(n::Integer, m::Integer; α::Real, x = 1, kwargs...) =
+        new{typeof(x),typeof(α)}(Int(n), Int(m), α, x, NamedTuple(kwargs))
+end
+
+"""
     BorelLeRoyPadeODM(n, m; x = 1, b_grid = range(-0.4, 0.4; length = 17), kwargs...)
 
 Order-dependent-mapping Borel–Le Roy–Padé tag.
@@ -355,6 +373,8 @@ resum(bp::BorelPadeMedian, a) =
     borel_pade_median(a; n = bp.n, m = bp.m, x = bp.x, bp.kwargs...)
 resum(bl::BorelLeRoyPade, a) =
     borel_leroy_pade(a; n = bl.n, m = bl.m, b = bl.b, x = bl.x, bl.kwargs...)
+resum(ml::MittagLefflerBorelPade, a) =
+    mittag_leffler_borel_pade(a; n = ml.n, m = ml.m, α = ml.α, x = ml.x, ml.kwargs...)
 resum(o::BorelLeRoyPadeODM, a) =
     borel_leroy_pade_odm(a; n = o.n, m = o.m, x = o.x, b_grid = o.b_grid, o.kwargs...)
 resum(cb::ConformalBorelPade, a) =

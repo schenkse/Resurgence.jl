@@ -43,6 +43,36 @@ function borel_leroy_transform(a::AbstractVector{T}, b::Real) where {T<:Number}
 end
 
 """
+    mittag_leffler_borel_transform(a, α) -> Vector
+
+Mittag-Leffler-Borel transform of order `α > 0`:
+
+    B[k] = a[k] / Γ(α·k + 1).
+
+The associated inverse transform (see [`mittag_leffler_borel_pade`](@ref)) uses
+the kernel `ϕ_α(t) = (1/α)·t^{(1−α)/α}·e^{−t^{1/α}}` whose `k`-th moment is
+`Γ(α·k + 1)`. With α = 1 this reduces to the standard Borel transform; α > 1
+tolerates super-factorial growth such as `(2k)!`; α < 1 sharpens convergence
+for sub-factorial growth.
+
+Unlike [`borel_leroy_transform`](@ref) which can amortise `Γ` via the
+recurrence `Γ(k+1+b) = (k+b)·Γ(k+b)`, the `Γ(α·k+1)` factors do not share a
+common increment for non-integer `α`, so one `gamma` call is issued per
+coefficient. For BigFloat element types this remains dominated by the
+`gamma` cost.
+"""
+function mittag_leffler_borel_transform(a::AbstractVector{T}, α::Real) where {T<:Number}
+    α > 0 || throw(ArgumentError("mittag_leffler_borel_transform needs α > 0 (got $α)"))
+    R = real(T)
+    αR = R(α)
+    out = similar(a)
+    @inbounds for k in 0:length(a)-1
+        out[k+1] = a[k+1] / gamma(αR * R(k) + one(R))
+    end
+    return out
+end
+
+"""
     borel_ratios(b) -> Vector
 
 Return the consecutive-coefficient ratios `b[k+1] / b[k]` of a Borel transform
