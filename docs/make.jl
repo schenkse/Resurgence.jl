@@ -22,6 +22,7 @@ makedocs(;
         "Getting started" => "getting_started.md",
         "Tutorials" => [
             "Stieltjes / Euler series"      => "tutorials/stieltjes.md",
+            "Anharmonic oscillator"         => "tutorials/anharmonic.md",
             "Lateral and median sums"       => "tutorials/lateral_sums.md",
             "Stokes / large-order diagnostics" => "tutorials/stokes_diagnostics.md",
             "Trans-series"                  => "tutorials/transseries.md",
