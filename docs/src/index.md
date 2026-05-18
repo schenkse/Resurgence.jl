@@ -12,10 +12,10 @@ Every method is generic over the input element type — `Float64`, `BigFloat`, `
 | ----------------------- | ------- |
 | Sequence acceleration   | Shanks (with iterated depth), Richardson |
 | Padé approximants       | Linear, continued-fraction (qd), Hermite/quadratic |
-| Borel side              | Borel, Borel–Le Roy, Borel–Padé, conformal Borel–Padé |
+| Borel side              | Borel, Borel–Le Roy, Borel–Padé, conformal Borel–Padé (single singularity and singularity-pair), order-dependent mapping (ODM) |
 | Lateral/median sums   | Lateral, median, and discontinuity for Borel–Padé and Borel–Le Roy–Padé |
 | Closed-form             | Meijer-G via Slater collapse onto `pFq` |
-| Truncation              | Optimal truncation, superasymptotic remainder |
+| Truncation              | Optimal truncation, superasymptotic remainder, hyperasymptotic / terminant (Berry–Howls level 1) |
 | Diagnostics             | Stokes action, exponent, constant, joint fit |
 | Trans-series            | `Sector` / `TransSeries` types with action-additive arithmetic, per-sector resummation via `resum_transseries` |
 

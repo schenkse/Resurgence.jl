@@ -12,6 +12,8 @@ This page is a decision tree.
 | Factorially divergent, alternating sign (Borel-summable)              | [`borel_pade`](@ref)                               | [`conformal_borel_pade`](@ref) if you know where the singularity is        |
 | Factorially divergent, all-positive (non-Borel-summable)              | [`borel_pade_median`](@ref)                        | [`borel_pade_lateral`](@ref) + [`borel_pade_discontinuity`](@ref)          |
 | Borel transform has known branch point at `t = -sing`                 | [`conformal_borel_pade`](@ref)                     | [`borel_leroy_pade`](@ref) with tuned `b`                                  |
+| Borel transform has a complex-conjugate singularity pair at `t = ±i·sing` | [`conformal_borel_pade_pair`](@ref)            | useful for PT-symmetric problems and the quartic anharmonic oscillator     |
+| Want variational selection of the Le Roy `b` (Bender–Boettcher style) | [`borel_leroy_pade_odm`](@ref)                     | sweep a `b_grid`, pick the stationary point                                |
 | Borel transform has algebraic branch point in `x`                     | [`hermite_pade`](@ref)                             | [`hermite_pade_value`](@ref) with branch selector                          |
 | You suspect closed form/hypergeometric                              | [`borel_meijerg`](@ref)                            | The Stieltjes tutorial covers degenerate cases                             |
 | Just need a quick error bound on a partial sum                        | [`optimal_truncation`](@ref)                       | [`superasymptotic_remainder`](@ref) for the tail estimate alone            |
@@ -82,6 +84,13 @@ The variants differ in how they handle the Padé step:
 - [`conformal_borel_pade`](@ref) — first apply a conformal map that pushes the known Borel singularity to the boundary of the unit disk, then Padé.
   Best when you know `sing` (or have estimated it via [`stokes_action`](@ref)).
   Subsumes `borel_pade` for benign cases and beats it when the singularity is known.
+- [`conformal_borel_pade_pair`](@ref) — same idea as `conformal_borel_pade`, but for a complex-conjugate Borel-plane singularity pair at `t = ±i·sing` rather than a single point on the negative real axis.
+  The relevant conformal map is `t = 2·sing·v / (1 − v²)`, with the inverse pulled back along the positive real `t` axis for the Laplace integral.
+  PT-symmetric problems and the quartic anharmonic oscillator are the canonical drivers.
+- [`borel_leroy_pade_odm`](@ref) — order-dependent mapping.
+  Treat the Le Roy parameter `b` as variational: sweep it over a grid, locate the stationary point of the resummation value vs. `b`, and return the value there.
+  This is the Bender–Boettcher style of variational improvement, where the answer is the one that depends most weakly on the unphysical knob.
+  The default grid stays inside `(−1, 0)` so the Le Roy weight `Γ(k + 1 + b)` has no integer poles.
 
 For a series whose Borel transform has a singularity on the *positive* real axis (`S < 0`), the standard Laplace integral is ill-defined.
 Use the lateral/median variants:
@@ -106,6 +115,10 @@ See the [Stieltjes tutorial](tutorials/stieltjes.md) for details.
 This is "free" — it doesn't compute anything beyond the partial sums you already have — and is a useful sanity check on top of any of the resummation methods above.
 
 [`superasymptotic_remainder`](@ref) is the underlying tail-size estimate on its own.
+
+For better-than-superasymptotic accuracy on a single series — without going to a full Borel sum — see [`hyperasymptotic`](@ref) and the underlying [`terminant`](@ref).
+These add the Berry–Howls level-1 correction (the leading lateral piece of the trans-series tail) to the optimally-truncated partial sum, gaining a factor `∼e^{−|S|/x}` of accuracy.
+`stokes_fit` provides defaults for the required `action`, `β`, `A`; any of them can be overridden.
 
 ## Stokes diagnostics
 
