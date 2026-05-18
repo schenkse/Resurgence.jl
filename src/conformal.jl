@@ -67,12 +67,15 @@ function conformal_reseries(b::AbstractVector{T}, a::Real, N::Integer) where {T<
 
     # Accumulate B(t(w)) = Σ_k b_k · t(w)^k, truncating each power at order N
     # via a direct convolution that never materialises the discarded high-order
-    # coefficients.
+    # coefficients. Two scratch buffers `pow` and `nextpow` are swapped each
+    # iteration so no allocation happens inside the loop.
     out = zeros(T, N + 1)
     out[1] = b[1]                         # k = 0 contribution
     pow = zeros(T, N + 1); pow[1] = one(T)   # t(w)^0
+    nextpow = zeros(T, N + 1)
     @inbounds for k in 1:length(b)-1
-        pow = _mul_trunc(pow, tw, N)
+        _mul_trunc!(nextpow, pow, tw, N)
+        pow, nextpow = nextpow, pow
         bk = b[k+1]
         for i in eachindex(pow)
             out[i] += bk * pow[i]
@@ -81,8 +84,11 @@ function conformal_reseries(b::AbstractVector{T}, a::Real, N::Integer) where {T<
     return out
 end
 
-function _mul_trunc(p::AbstractVector{T}, q::AbstractVector{T}, N::Integer) where {T}
-    out = zeros(T, N + 1)
+# In-place truncated multiplication: out ← p · q (coefficient convolution),
+# truncated at total degree N. Caller owns `out`; it is zeroed on entry.
+function _mul_trunc!(out::AbstractVector{T}, p::AbstractVector{T},
+                     q::AbstractVector{T}, N::Integer) where {T}
+    fill!(out, zero(T))
     @inbounds for i in eachindex(p)
         pi_ = p[i]
         iszero(pi_) && continue
@@ -92,6 +98,11 @@ function _mul_trunc(p::AbstractVector{T}, q::AbstractVector{T}, N::Integer) wher
         end
     end
     return out
+end
+
+# Non-mutating wrapper kept for callers that want the convenience form.
+function _mul_trunc(p::AbstractVector{T}, q::AbstractVector{T}, N::Integer) where {T}
+    return _mul_trunc!(zeros(T, N + 1), p, q, N)
 end
 
 # Conformal map for a complex-conjugate singularity pair at t = ±i·a
@@ -167,8 +178,10 @@ function conformal_reseries_pair(b::AbstractVector{T}, a::Real, N::Integer) wher
     out = zeros(T, N + 1)
     out[1] = b[1]
     pow = zeros(T, N + 1); pow[1] = one(T)
+    nextpow = zeros(T, N + 1)
     @inbounds for k in 1:length(b)-1
-        pow = _mul_trunc(pow, tv, N)
+        _mul_trunc!(nextpow, pow, tv, N)
+        pow, nextpow = nextpow, pow
         bk = b[k+1]
         for i in eachindex(pow)
             out[i] += bk * pow[i]
