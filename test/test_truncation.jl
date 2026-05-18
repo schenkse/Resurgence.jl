@@ -134,9 +134,9 @@ end
         @test 0.1 < abs(imag(v) / imag(Lp)) < 10
     end
 
-    @testset "level ≥ 2 throws" begin
+    @testset "level ≥ 3 throws" begin
         a = Float64.(stieltjes(BigFloat, 25))
-        @test_throws ArgumentError hyperasymptotic(a; x = 0.1, level = 2)
+        @test_throws ArgumentError hyperasymptotic(a; x = 0.1, level = 3)
         @test_throws ArgumentError hyperasymptotic(a; x = 0.1, level = -1)
     end
 
@@ -162,6 +162,91 @@ end
         a = Float64.(stieltjes(BigFloat, 25))
         v_func = hyperasymptotic(a; x = 0.1, level = 0)
         v_api = resum(Hyperasymptotic(; x = 0.1, level = 0), a)
+        @test v_func ≈ v_api
+    end
+
+    @testset "level=2 :subleading matches the closed-form (1 + c₁·x) factor" begin
+        # For a_k = k! with S=β=A=1 and explicit c₁, the level-2 correction is
+        # exactly -i·π·exp(-1/x)/x · (1 + c₁·x). Verify against the closed form.
+        a = Float64.(factorials(BigFloat, 25))
+        x = 0.1
+        c1 = -0.5
+        v = hyperasymptotic(a; x = x, level = 2, kind = :subleading,
+                            action = 1.0, β = 1.0, A = 1.0, c = [c1])
+        expected_imag = -π * x^(-1.0) * exp(-1.0 / x) * (1 + c1 * x)
+        @test imag(v) ≈ expected_imag rtol = 1e-12
+    end
+
+    @testset "level=2 :subleading auto-extracts c₁ via stokes_fit" begin
+        # a_k = k! has c₁ ≈ 0 (leading is exact, no subleading correction).
+        # Auto-extracted level-2 should be close to level-1.
+        a = Float64.(factorials(BigFloat, 25))
+        x = 0.05
+        v1 = hyperasymptotic(a; x = x, level = 1, action = 1.0, β = 1.0, A = 1.0)
+        v2 = hyperasymptotic(a; x = x, level = 2, kind = :subleading,
+                             action = 1.0, β = 1.0, A = 1.0)
+        # |c₁·x| is small, so level-2 within ~10% of level-1 imaginary part
+        @test isapprox(imag(v2), imag(v1); rtol = 0.1)
+    end
+
+    @testset "level=2 :subleading explicit empty c errors" begin
+        a = Float64.(factorials(BigFloat, 25))
+        @test_throws ArgumentError hyperasymptotic(a; x = 0.1, level = 2,
+                                                   kind = :subleading,
+                                                   action = 1.0, β = 1.0, A = 1.0,
+                                                   c = Float64[])
+    end
+
+    @testset "level=2 :two_instanton explicit triples sum both contributions" begin
+        # Pick (S=1, β=1, A=1) and (S₂=2, β₂=1, A₂=0.5) — straight closed form.
+        a = Float64.(factorials(BigFloat, 25))    # only used to count Nstar / partial
+        x = 0.1
+        v = hyperasymptotic(a; x = x, level = 2, kind = :two_instanton,
+                            action = 1.0, β = 1.0, A = 1.0,
+                            action_2 = 2.0, β_2 = 1.0, A_2 = 0.5)
+        # Both contributions are pure imaginary on real inputs.
+        expected_imag = -π * x^(-1.0) * exp(-1.0 / x) -
+                         π * 0.5 * x^(-1.0) * exp(-2.0 / x)
+        @test imag(v) ≈ expected_imag rtol = 1e-12
+    end
+
+    @testset "level=2 :two_instanton partial (action_2, β_2, A_2) errors" begin
+        a = Float64.(factorials(BigFloat, 25))
+        @test_throws ArgumentError hyperasymptotic(a; x = 0.1, level = 2,
+                                                   kind = :two_instanton,
+                                                   action = 1.0, β = 1.0, A = 1.0,
+                                                   action_2 = 2.0)
+    end
+
+    @testset "level=2 :two_instanton too-short for residual fit errors" begin
+        # Only 8 coefficients — below the length≥12 gate when auto-extracting.
+        a = Float64.(factorials(BigFloat, 8))
+        @test_throws ArgumentError hyperasymptotic(a; x = 0.1, level = 2,
+                                                   kind = :two_instanton,
+                                                   action = 1.0, β = 1.0, A = 1.0)
+    end
+
+    @testset "level=2 invalid kind errors" begin
+        a = Float64.(factorials(BigFloat, 25))
+        @test_throws ArgumentError hyperasymptotic(a; x = 0.1, level = 2,
+                                                   kind = :nonsense,
+                                                   action = 1.0, β = 1.0, A = 1.0)
+    end
+
+    @testset "level=2 BigFloat smoke" begin
+        a = factorials(BigFloat, 25)
+        v = hyperasymptotic(a; x = big"0.1", level = 2, kind = :subleading,
+                            action = big"1", β = big"1", A = big"1",
+                            c = BigFloat[big"-0.5"])
+        @test v isa Complex{BigFloat}
+    end
+
+    @testset "Hyperasymptotic API tag level=2 dispatches" begin
+        a = Float64.(factorials(BigFloat, 25))
+        v_func = hyperasymptotic(a; x = 0.1, level = 2, kind = :subleading,
+                                 action = 1.0, β = 1.0, A = 1.0, c = [-0.5])
+        v_api = resum(Hyperasymptotic(; x = 0.1, level = 2, kind = :subleading,
+                                       action = 1.0, β = 1.0, A = 1.0, c = [-0.5]), a)
         @test v_func ≈ v_api
     end
 end

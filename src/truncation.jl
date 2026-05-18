@@ -67,7 +67,10 @@ function terminant(p::Number, σ::Number)
 end
 
 """
-    hyperasymptotic(a; x = 1, level = 1, action = nothing, β = nothing, A = nothing)
+    hyperasymptotic(a; x = 1, level = 1, kind = :subleading,
+                    action = nothing, β = nothing, A = nothing,
+                    c = nothing,
+                    action_2 = nothing, β_2 = nothing, A_2 = nothing)
 
 Hyperasymptotic resummation of the formal power series `Σₖ a[k+1] · xᵏ`.
 
@@ -91,6 +94,33 @@ instanton singularity. The exported [`terminant`](@ref) function provides
 the smoothed-Stokes-multiplier building block for users wanting to refine
 the crossover further.
 
+`level = 2` adds a second-order correction selected by `kind`:
+
+- `kind = :subleading` (default) — next-to-leading 1/k term within the
+  *same* Stokes singularity:
+
+      R^{(2)}_{N*}(x) ≈ -i π · A · x^{-β} · exp(-S/x) · (1 + c₁ · x).
+
+  The subleading coefficient `c₁` is taken from `c[1]` if `c` is provided,
+  otherwise extracted via [`stokes_fit`](@ref) with `subleading = 1`. `c`
+  can be a vector of any length ≥ 1 (only `c[1]` is used).
+
+- `kind = :two_instanton` — add a *second* Stokes singularity:
+
+      R^{(2)}_{N*}(x) ≈ -i π · A · x^{-β} · e^{-S/x}
+                       - i π · A₂ · x^{-β₂} · e^{-S₂/x}.
+
+  The second triple `(action_2, β_2, A_2)` is taken verbatim if supplied
+  (all three together), otherwise extracted by [`stokes_fit`](@ref) on
+  the *residual* series `a[k+1] - A · Γ(k+β) / S^{k+β}` — needs enough
+  coefficients (`length(a) ≥ 12`) for the second extraction to be
+  stable, and throws if the residual fit produces a near-degenerate
+  `S₂ ≈ S`.
+
+The `(action, β, A)` and `(c | action_2, β_2, A_2)` are independent
+keyword groups: each enforces all-or-none internally, but you may
+explicit-supply one group while auto-extracting the other.
+
 The convention is `Re(action) > 0` (positive instanton action with the
 Stokes line on the positive real `t`-axis). For Borel-summable problems
 whose Stokes singularity sits on the *negative* real axis the level-1
@@ -98,17 +128,23 @@ formula is not applicable, and the function throws — pass an explicit
 positive `action` only when the singularity is genuinely on the positive
 real axis.
 
-Levels `≥ 2` require subleading or trans-series data not extracted by
-this function and currently throw; the caller should drop down to
-[`resum_transseries`](@ref) for those.
+Levels `≥ 3` need late-of-late machinery or full trans-series input and
+currently throw; the caller should drop down to [`resum_transseries`](@ref)
+for those.
 """
 function hyperasymptotic(a::AbstractVector{T}; x = 1, level::Integer = 1,
+                         kind::Symbol = :subleading,
                          action::Union{Number,Nothing} = nothing,
                          β::Union{Number,Nothing} = nothing,
-                         A::Union{Number,Nothing} = nothing) where {T<:Number}
+                         A::Union{Number,Nothing} = nothing,
+                         c::Union{AbstractVector{<:Number},Nothing} = nothing,
+                         action_2::Union{Number,Nothing} = nothing,
+                         β_2::Union{Number,Nothing} = nothing,
+                         A_2::Union{Number,Nothing} = nothing) where {T<:Number}
     isempty(a) && throw(ArgumentError("series must be non-empty"))
-    level ∈ (0, 1) || throw(ArgumentError("hyperasymptotic supports level ∈ {0, 1}; \
-        higher levels require subleading or trans-series data outside this function's scope"))
+    level ∈ (0, 1, 2) || throw(ArgumentError("hyperasymptotic supports level ∈ {0, 1, 2}; \
+        higher levels need late-of-late machinery or full trans-series input outside this \
+        function's scope"))
 
     Nstar = _optimal_index_at(a, x)
     U = promote_type(T, typeof(x))
@@ -129,13 +165,66 @@ function hyperasymptotic(a::AbstractVector{T}; x = 1, level::Integer = 1,
     else
         action, β, A
     end
-    real(Sv) > 0 || throw(ArgumentError("hyperasymptotic level=1 needs a Stokes singularity \
+    real(Sv) > 0 || throw(ArgumentError("hyperasymptotic level≥1 needs a Stokes singularity \
         with positive real `action` (got $Sv); for Borel-summable problems whose Stokes \
         singularity sits off the positive real axis the level-1 formula does not apply"))
 
     V = promote_type(U, typeof(Sv), typeof(βv), typeof(Av), ComplexF64)
-    correction = -im * V(π) * V(Av) * V(x)^(-V(βv)) * exp(-V(Sv) / V(x))
+    prefactor1 = -im * V(π) * V(Av) * V(x)^(-V(βv)) * exp(-V(Sv) / V(x))
+    correction = prefactor1
+
+    if level == 2
+        if kind === :subleading
+            cv = if c === nothing
+                stokes_fit(a; subleading = 1).c
+            else
+                c
+            end
+            length(cv) ≥ 1 || throw(ArgumentError("hyperasymptotic level=2 :subleading needs \
+                at least one subleading coefficient (c[1]); got empty `c`"))
+            correction = prefactor1 * (one(V) + V(cv[1]) * V(x))
+        elseif kind === :two_instanton
+            S2, β2v, A2v = _resolve_two_instanton(a, Sv, βv, Av, action_2, β_2, A_2)
+            prefactor2 = -im * V(π) * V(A2v) * V(x)^(-V(β2v)) * exp(-V(S2) / V(x))
+            correction = prefactor1 + prefactor2
+        else
+            throw(ArgumentError("hyperasymptotic `kind` must be :subleading or :two_instanton \
+                (got $(repr(kind)))"))
+        end
+    end
+
     return V(partial) + correction
+end
+
+# Resolve the second-singularity triple (S₂, β₂, A₂) for level=2 :two_instanton.
+# Either uses the user-supplied (action_2, β_2, A_2) when all three are present,
+# or extracts them by subtracting the leading large-order prediction
+# A · Γ(k+β) / S^{k+β} from each a[k+1] and running stokes_fit on the residual.
+function _resolve_two_instanton(a::AbstractVector{T}, S::Number, β::Number, A::Number,
+                                action_2, β_2, A_2) where {T<:Number}
+    nprovided = count(!isnothing, (action_2, β_2, A_2))
+    if nprovided == 3
+        return action_2, β_2, A_2
+    elseif nprovided != 0
+        throw(ArgumentError("provide either all of (action_2, β_2, A_2) or none; \
+            got $nprovided of 3"))
+    end
+    length(a) ≥ 12 ||
+        throw(ArgumentError("hyperasymptotic level=2 :two_instanton needs \
+            length(a) ≥ 12 to extract the second Stokes triple from the residual \
+            (got $(length(a))); supply (action_2, β_2, A_2) explicitly for shorter inputs"))
+    U = promote_type(T, typeof(S), typeof(β), typeof(A))
+    residual = Vector{U}(undef, length(a))
+    @inbounds for k in 0:length(a)-1
+        # a[k+1] ≈ A · Γ(k+β) / S^{k+β} + (subleading singularity contribution)
+        residual[k+1] = U(a[k+1]) - U(A) * gamma(U(k) + U(β)) / U(S)^(U(k) + U(β))
+    end
+    f = stokes_fit(residual)
+    abs(f.S - S) > abs(S) / 10 ||
+        throw(ArgumentError("hyperasymptotic level=2 :two_instanton extracted a near-degenerate \
+            second action S₂ ≈ S (got S₂=$(f.S), S=$S); the residual fit is unreliable. \
+            Supply (action_2, β_2, A_2) explicitly."))
+    return f.S, f.β, f.A
 end
 
 # Index k that minimises |a[k] · x^{k-1}|, i.e. optimal truncation aware
