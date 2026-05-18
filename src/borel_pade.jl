@@ -202,6 +202,19 @@ function borel_pade_lateral(a::AbstractVector{T};
                       regularize_poles = true, side = side, ε = ε_use, kwargs...)
 end
 
+# (L⁺, L⁻) combinators shared by the median and discontinuity wrappers.
+_median(Lp, Lm) = (Lp + Lm) / 2
+_discontinuity(Lp, Lm) = (Lp - Lm) / (2 * im)
+
+# Run `lateral_fn(a; side = +1, kwargs...)` and `lateral_fn(a; side = -1, kwargs...)`,
+# then return `combine(Lp, Lm)`. Used to build median/discontinuity wrappers from
+# their lateral building blocks without copy-pasting the signature.
+function _lateral_combine(combine, lateral_fn, a; kwargs...)
+    Lp = lateral_fn(a; side = +1, kwargs...)
+    Lm = lateral_fn(a; side = -1, kwargs...)
+    return combine(Lp, Lm)
+end
+
 """
     borel_pade_median(a; n, m, x = 1, ε = nothing, kwargs...)
 
@@ -210,14 +223,12 @@ real `a` the result is purely real (up to roundoff and `quadgk` tolerance);
 this is the ambiguity-free real-valued resummation of a non-Borel-summable
 series.
 """
-function borel_pade_median(a::AbstractVector;
-                           n::Integer, m::Integer, x = 1,
-                           ε::Union{Real,Nothing} = nothing,
-                           kwargs...)
-    Lp = borel_pade_lateral(a; n = n, m = m, x = x, side = +1, ε = ε, kwargs...)
-    Lm = borel_pade_lateral(a; n = n, m = m, x = x, side = -1, ε = ε, kwargs...)
-    return (Lp + Lm) / 2
-end
+borel_pade_median(a::AbstractVector;
+                  n::Integer, m::Integer, x = 1,
+                  ε::Union{Real,Nothing} = nothing,
+                  kwargs...) =
+    _lateral_combine(_median, borel_pade_lateral, a;
+                     n = n, m = m, x = x, ε = ε, kwargs...)
 
 """
     borel_pade_discontinuity(a; n, m, x = 1, ε = nothing, kwargs...)
@@ -226,14 +237,12 @@ Stokes discontinuity `(L⁺ − L⁻) / (2i)` of the Borel–Padé sum. Encodes 
 ambiguity of the lateral sums and is proportional to the leading instanton
 contribution `Stokes_constant · e^{−|S|/x}`. For real `a` the result is real.
 """
-function borel_pade_discontinuity(a::AbstractVector;
-                                  n::Integer, m::Integer, x = 1,
-                                  ε::Union{Real,Nothing} = nothing,
-                                  kwargs...)
-    Lp = borel_pade_lateral(a; n = n, m = m, x = x, side = +1, ε = ε, kwargs...)
-    Lm = borel_pade_lateral(a; n = n, m = m, x = x, side = -1, ε = ε, kwargs...)
-    return (Lp - Lm) / (2 * im)
-end
+borel_pade_discontinuity(a::AbstractVector;
+                         n::Integer, m::Integer, x = 1,
+                         ε::Union{Real,Nothing} = nothing,
+                         kwargs...) =
+    _lateral_combine(_discontinuity, borel_pade_lateral, a;
+                     n = n, m = m, x = x, ε = ε, kwargs...)
 
 """
     borel_leroy_pade_lateral(a; n, m, b = -1//2, x = 1, side = +1, ε = nothing, kwargs...)
@@ -260,34 +269,26 @@ end
 
 Median Borel–Le Roy–Padé sum `(L⁺ + L⁻) / 2`.
 """
-function borel_leroy_pade_median(a::AbstractVector;
-                                 n::Integer, m::Integer,
-                                 b::Real = -1//2, x = 1,
-                                 ε::Union{Real,Nothing} = nothing,
-                                 kwargs...)
-    Lp = borel_leroy_pade_lateral(a; n = n, m = m, b = b, x = x,
-                                  side = +1, ε = ε, kwargs...)
-    Lm = borel_leroy_pade_lateral(a; n = n, m = m, b = b, x = x,
-                                  side = -1, ε = ε, kwargs...)
-    return (Lp + Lm) / 2
-end
+borel_leroy_pade_median(a::AbstractVector;
+                        n::Integer, m::Integer,
+                        b::Real = -1//2, x = 1,
+                        ε::Union{Real,Nothing} = nothing,
+                        kwargs...) =
+    _lateral_combine(_median, borel_leroy_pade_lateral, a;
+                     n = n, m = m, b = b, x = x, ε = ε, kwargs...)
 
 """
     borel_leroy_pade_discontinuity(a; n, m, b = -1//2, x = 1, ε = nothing, kwargs...)
 
 Stokes discontinuity `(L⁺ − L⁻) / (2i)` of the Borel–Le Roy–Padé sum.
 """
-function borel_leroy_pade_discontinuity(a::AbstractVector;
-                                        n::Integer, m::Integer,
-                                        b::Real = -1//2, x = 1,
-                                        ε::Union{Real,Nothing} = nothing,
-                                        kwargs...)
-    Lp = borel_leroy_pade_lateral(a; n = n, m = m, b = b, x = x,
-                                  side = +1, ε = ε, kwargs...)
-    Lm = borel_leroy_pade_lateral(a; n = n, m = m, b = b, x = x,
-                                  side = -1, ε = ε, kwargs...)
-    return (Lp - Lm) / (2 * im)
-end
+borel_leroy_pade_discontinuity(a::AbstractVector;
+                               n::Integer, m::Integer,
+                               b::Real = -1//2, x = 1,
+                               ε::Union{Real,Nothing} = nothing,
+                               kwargs...) =
+    _lateral_combine(_discontinuity, borel_leroy_pade_lateral, a;
+                     n = n, m = m, b = b, x = x, ε = ε, kwargs...)
 
 """
     borel_leroy_pade_odm(a; n, m, x = 1, b_grid = range(-0.4, 0.4; length = 17),
