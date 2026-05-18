@@ -152,3 +152,108 @@ function compare(methods, a; reference = nothing)
     end
     return rows
 end
+
+"""
+    coefficient_diagnostics(a; window = nothing) -> NamedTuple
+
+Raw numerical inspection of a formal-power-series coefficient vector. Returns
+the tail ratios `|a[k+1]/a[k]|`, their geometric mean, a factorial-vs-geometric
+indicator, a Cauchy–Hadamard / Darboux radius-of-convergence estimate, and a
+soft alternation score.
+
+Sister of [`diagnose`](@ref): `diagnose` returns a *recommendation* (which
+methods to try); `coefficient_diagnostics` returns *numbers*. Use this when
+you want the ratio test or Darboux singularity estimate before committing to
+a resummation strategy.
+
+`window` is the number of trailing ratios to look at (default
+`min(length(a)-1, max(4, (length(a)-1) ÷ 2))`, the same window
+[`diagnose`](@ref) uses).
+
+Fields of the returned `NamedTuple`:
+
+- `ratios::Vector{Float64}` — `|a[k+1]/a[k]|` over the tail window.
+- `ratio_mean::Float64` — geometric mean of `ratios`; `0` if any zero
+  coefficient sits inside the window.
+- `ratio_growth::Float64` — `ratios[end]/ratios[1]`; near `1` indicates
+  geometric growth, large values indicate factorial growth.
+- `growth::Symbol` — one of `:convergent`, `:geometric`, `:factorial`,
+  `:unknown` (heuristic — see [`diagnose`](@ref)).
+- `darboux_singularity::Union{Float64,Missing}` — `1/ratio_mean` when the
+  tail ratios are approximately flat (`growth ∈ (:convergent, :geometric)`),
+  the Cauchy–Hadamard / Darboux nearest-singularity estimate on the original
+  `z`-plane series; `missing` when ratios grow (factorial) or are unresolved.
+- `alternating::Bool` — every neighbouring pair in the tail window flips
+  sign (real part), matching [`diagnose`](@ref).
+- `alternation_score::Float64` — fraction of neighbouring pairs in the
+  window that flip sign, in `[0, 1]`. `1.0` is strict alternation, `≈ 0`
+  is monotone, intermediate values flag noisy or eventual alternation.
+
+Throws `ArgumentError` on an empty input. Returns reasonable degenerate
+values (`NaN` ratios, `:unknown` growth, `missing` Darboux) for very short
+inputs.
+"""
+function coefficient_diagnostics(a::AbstractVector{T};
+                                 window::Union{Integer,Nothing} = nothing) where {T<:Number}
+    isempty(a) && throw(ArgumentError("coefficient_diagnostics: a must be non-empty"))
+    n = length(a)
+    if n < 2
+        return (
+            ratios              = Float64[],
+            ratio_mean          = NaN,
+            ratio_growth        = NaN,
+            growth              = :unknown,
+            darboux_singularity = missing,
+            alternating         = false,
+            alternation_score   = 0.0,
+        )
+    end
+    K = window === nothing ? min(n - 1, max(4, (n - 1) ÷ 2)) : Int(window)
+    1 ≤ K ≤ n - 1 || throw(ArgumentError("window must satisfy 1 ≤ window ≤ length(a)-1"))
+
+    ratios = Vector{Float64}(undef, K)
+    any_zero = false
+    @inbounds for i in 1:K
+        k = n - K + i - 1
+        ak = abs(a[k])
+        if iszero(ak)
+            ratios[i] = NaN
+            any_zero = true
+        else
+            ratios[i] = float(abs(a[k+1]) / ak)
+        end
+    end
+    ratio_mean = any_zero || !all(isfinite, ratios) ?
+                 0.0 : exp(sum(log, ratios) / K)
+    ratio_growth = (isfinite(ratios[1]) && ratios[1] > 0 && isfinite(ratios[end])) ?
+                   ratios[end] / ratios[1] : NaN
+
+    growth      = _classify_growth(a)
+    alternating = _is_alternating_tail(a; window = K)
+
+    darboux_singularity = if growth ∈ (:convergent, :geometric) && ratio_mean > 0 && isfinite(ratio_mean)
+        1 / ratio_mean
+    else
+        missing
+    end
+
+    flips = 0
+    counted = 0
+    @inbounds for k in (n - K):(n - 1)
+        x = real(a[k]); y = real(a[k+1])
+        (iszero(x) || iszero(y)) && continue
+        counted += 1
+        sign(x) != sign(y) && (flips += 1)
+    end
+    alternation_score = counted == 0 ? 0.0 : flips / counted
+
+    return (
+        ratios              = ratios,
+        ratio_mean          = ratio_mean,
+        ratio_growth        = ratio_growth,
+        growth              = growth,
+        darboux_singularity = darboux_singularity,
+        alternating         = alternating,
+        alternation_score   = alternation_score,
+    )
+end

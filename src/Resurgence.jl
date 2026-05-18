@@ -57,6 +57,6 @@ export resum
 export Sector, TransSeries, transseries_exp, resum_transseries
 
 # diagnostics
-export diagnose, compare
+export diagnose, compare, coefficient_diagnostics
 
 end # module

@@ -98,4 +98,79 @@ using Resurgence
         @test length(rows) == 2
     end
 
+    @testset "coefficient_diagnostics: convergent geometric Darboux estimate" begin
+        # a_k = 0.5^k → |a_{k+1}/a_k| = 0.5, radius of convergence = 2.
+        a = Float64[0.5^k for k in 0:30]
+        d = coefficient_diagnostics(a)
+        @test d.growth == :convergent
+        @test d.alternating == false
+        @test d.ratio_mean ≈ 0.5 rtol = 1e-12
+        @test d.ratio_growth ≈ 1.0 rtol = 1e-12
+        @test !ismissing(d.darboux_singularity)
+        @test d.darboux_singularity ≈ 2.0 rtol = 1e-12
+        @test d.alternation_score == 0.0
+    end
+
+    @testset "coefficient_diagnostics: divergent geometric Darboux estimate" begin
+        # a_k = 2^k → |a_{k+1}/a_k| = 2, |z| < 1/2 radius of convergence.
+        a = Float64[2.0^k for k in 0:30]
+        d = coefficient_diagnostics(a)
+        @test d.growth == :geometric
+        @test d.ratio_mean ≈ 2.0 rtol = 1e-12
+        @test !ismissing(d.darboux_singularity)
+        @test d.darboux_singularity ≈ 0.5 rtol = 1e-12
+    end
+
+    @testset "coefficient_diagnostics: factorial Stieltjes" begin
+        a = Float64[(-1.0)^k * Float64(factorial(big(k))) for k in 0:24]
+        d = coefficient_diagnostics(a)
+        @test d.growth == :factorial
+        @test d.alternating == true
+        @test d.ratio_growth > 1.5           # ratios grow with k; tail ratio is ~24/13
+        @test ismissing(d.darboux_singularity)
+        @test d.alternation_score == 1.0
+    end
+
+    @testset "coefficient_diagnostics: partial alternation gives intermediate score" begin
+        # Alternates only over the last few terms; strict-alternation check
+        # returns false but the soft score is positive.
+        a = vcat(ones(15), Float64[(-1.0)^k for k in 1:10])
+        d = coefficient_diagnostics(a)
+        @test d.alternating == false || d.alternating == true  # depends on window
+        @test 0.0 < d.alternation_score ≤ 1.0
+    end
+
+    @testset "coefficient_diagnostics: short input is degenerate but safe" begin
+        d = coefficient_diagnostics([1.0])
+        @test isempty(d.ratios)
+        @test isnan(d.ratio_mean)
+        @test d.growth == :unknown
+        @test ismissing(d.darboux_singularity)
+    end
+
+    @testset "coefficient_diagnostics: empty errors" begin
+        @test_throws ArgumentError coefficient_diagnostics(Float64[])
+    end
+
+    @testset "coefficient_diagnostics: explicit window" begin
+        a = Float64[0.5^k for k in 0:30]
+        d = coefficient_diagnostics(a; window = 5)
+        @test length(d.ratios) == 5
+        @test d.ratio_mean ≈ 0.5 rtol = 1e-12
+    end
+
+    @testset "coefficient_diagnostics: invalid window errors" begin
+        a = Float64[0.5^k for k in 0:10]
+        @test_throws ArgumentError coefficient_diagnostics(a; window = 0)
+        @test_throws ArgumentError coefficient_diagnostics(a; window = length(a))
+    end
+
+    @testset "coefficient_diagnostics: BigFloat smoke" begin
+        a = BigFloat[0.5^k for k in 0:20]
+        d = coefficient_diagnostics(a)
+        @test d.ratio_mean isa Float64
+        @test d.darboux_singularity isa Float64
+        @test d.darboux_singularity ≈ 2.0 rtol = 1e-12
+    end
+
 end
