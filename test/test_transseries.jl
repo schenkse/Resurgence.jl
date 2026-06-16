@@ -1,6 +1,9 @@
 using Test
 using Resurgence
 
+# Minimal tag with no _with_x rule, to exercise the resum_transseries fallback.
+struct _UnsupportedResum <: AbstractResummation end
+
 @testset "TransSeries" begin
     @testset "Sector construction promotes mixed inputs" begin
         s = Sector(1, 0.0, [1.0, 2.0])
@@ -222,5 +225,41 @@ end
         v = resum_transseries(ts, g; method = Pade(0, 0))
         @test v isa BigFloat
         @test v ≈ 1 + exp(-BigFloat(2))
+    end
+
+    @testset "_with_x covers every x-bearing tag" begin
+        a_alt = Float64[(-1.0)^k * Float64(factorial(big(k))) for k in 0:24]
+        a_pos = Float64[Float64(factorial(big(k))) for k in 0:24]
+        g = 1.0
+
+        # A single perturbative sector (S = 0, β = 0) makes the prefactor
+        # exactly 1, so resum_transseries must reproduce the per-method call at
+        # x = g bit-for-bit. `isequal` so a NaN/complex result still compares
+        # (these tags are exercised for dispatch coverage, not physical accuracy).
+        @test isequal(
+            resum_transseries(TransSeries(a_alt), g;
+                              method = MittagLefflerBorelPade(8, 8; α = 1.0)),
+            mittag_leffler_borel_pade(a_alt; n = 8, m = 8, α = 1.0, x = g))
+
+        @test isequal(
+            resum_transseries(TransSeries(a_alt), g;
+                              method = ConformalBorelPadePair(8, 8)),
+            conformal_borel_pade_pair(a_alt; n = 8, m = 8, x = g))
+
+        @test isequal(
+            resum_transseries(TransSeries(a_alt), g;
+                              method = BorelLeRoyPadeODM(8, 8)),
+            borel_leroy_pade_odm(a_alt; n = 8, m = 8, x = g))
+
+        # Hyperasymptotic level 1 needs a positive real instanton action, so use
+        # the non-alternating k! series and a small coupling.
+        @test isequal(
+            resum_transseries(TransSeries(a_pos), 0.1; method = Hyperasymptotic()),
+            hyperasymptotic(a_pos; x = 0.1))
+    end
+
+    @testset "_with_x fallback errors clearly for unsupported tags" begin
+        @test_throws ArgumentError resum_transseries(
+            TransSeries(Float64[1.0, 2.0, 3.0]), 1.0; method = _UnsupportedResum())
     end
 end

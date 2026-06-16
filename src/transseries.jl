@@ -208,6 +208,23 @@ _with_x(m::BorelLeRoyPade, g) =
 _with_x(m::ConformalBorelPade, g) =
     ConformalBorelPade(m.n, m.m; x = g, sing = m.sing, m.kwargs...)
 _with_x(m::MeijerG, g) = MeijerG(m.n; x = g, m.kwargs...)
+_with_x(m::MittagLefflerBorelPade, g) =
+    MittagLefflerBorelPade(m.n, m.m; α = m.α, x = g, m.kwargs...)
+_with_x(m::ConformalBorelPadePair, g) =
+    ConformalBorelPadePair(m.n, m.m; x = g, sing = m.sing, m.kwargs...)
+_with_x(m::BorelLeRoyPadeODM, g) =
+    BorelLeRoyPadeODM(m.n, m.m; x = g, b_grid = m.b_grid, m.kwargs...)
+_with_x(m::Hyperasymptotic, g) =
+    Hyperasymptotic(; x = g, level = m.level, m.kwargs...)
+
+# Fallback: any AbstractResummation tag that reaches here has no specific
+# _with_x rule above. Rather than emit a bare MethodError, fail with guidance
+# so adding a new tag is a deliberate one-line decision, not a crash.
+_with_x(m::AbstractResummation, g) = throw(ArgumentError(
+    "resum_transseries: method $(typeof(m)) has no `_with_x` rule, so its " *
+    "evaluation point cannot be rebound to the coupling g. Add a `_with_x` " *
+    "method in src/transseries.jl — pass-through (return `m`) if the method " *
+    "has no evaluation point, otherwise rebind its `x` field to `g`."))
 
 """
     resum_transseries(ts::TransSeries, g; method::AbstractResummation)
