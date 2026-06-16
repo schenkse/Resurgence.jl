@@ -37,6 +37,7 @@ makedocs(;
             "Truncation"            => "api/truncation.md",
             "Stokes diagnostics"    => "api/stokes.md",
             "Trans-series"          => "api/transseries.md",
+            "Diagnostics"           => "api/diagnostics.md",
             "Unified `resum` API"   => "api/api.md",
         ],
         "References" => "references.md",
